@@ -1,0 +1,142 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {readFileSync,existsSync} from 'node:fs'
+import {primaryActivities} from './primaryActivities.js'
+import {primaryLessons} from './primaryLessonActivities.js'
+import {primaryAdvancedGames} from './primaryAdvancedGames.js'
+import {getGameEngine} from '../engines/index.js'
+import {primaryWorkshopEngine as workshop,workshopReady} from '../engines/primaryWorkshopEngine.js'
+import {getLessonContent} from '../lessonContent.js'
+
+test('60 bài riêng, mã chuẩn tồn tại, đủ 8 trò mỗi lớp và ảnh',()=>{
+  const official=readFileSync(new URL('../../document/2422_PL.md',import.meta.url),'utf8')
+  const officialCodes=new Set(official.match(/(?<!\d)(?:[1-9]|1[0-2])\.[A-D][1-5]\.(?:MR)?\d+/g))
+  assert.equal(primaryLessons.length,60)
+  for(const field of ['quiz','steps','example'])assert.equal(new Set(primaryLessons.map(l=>JSON.stringify(l.content[field]))).size,60,field)
+  for(const l of primaryLessons){
+    assert.ok(primaryActivities[l.grade].some(g=>g.id===l.content.gameId),l.id)
+    for(const code of l.ministry.split(' · '))assert.ok(officialCodes.has(code),`${l.id}: ${code}`)
+    assert.equal(l.content.steps.length,3)
+    assert.equal(l.content.quiz.options.length,3)
+    assert.ok(l.content.quiz.options[l.content.quiz.correct])
+    assert.ok(l.content.quiz.explanation.length>20)
+    const presented=getLessonContent(l)
+    assert.ok(presented.goal.length<=100,`${l.id}: mục tiêu quá dài`)
+    assert.ok(presented.theoryPoints.length>=1&&presented.theoryPoints.length<=5,`${l.id}: số ý lý thuyết`)
+    for(const point of presented.theoryPoints)assert.ok(point.length<=200,`${l.id}: ý lý thuyết quá dài`)
+  }
+  for(let grade=1;grade<=5;grade++)assert.equal(primaryActivities[grade].length,8)
+  for(const grade of [3,4,5])for(const game of primaryActivities[grade])assert.ok(existsSync(new URL(`../../public${game.image}`,import.meta.url)),game.image)
+  // This checks declared core coverage, not semantic mastery or extension completion.
+  const mapped=new Set(primaryLessons.flatMap(l=>l.ministry.split(' · ')))
+  for(const code of officialCodes)if(/^[1-5]\./.test(code)&&!code.includes('MR'))assert.ok(mapped.has(code),`Chưa phân công chuẩn cốt lõi ${code}`)
+  for(const game of Object.values(primaryAdvancedGames).flat())assert.ok(existsSync(new URL(`../../public${game.image}`,import.meta.url)),game.image)
+})
+
+test('tình huống đang sử dụng chặn sai, giữ lời giải, khôi phục và hoàn thành',()=>{
+  const prompts=new Set()
+  const active=Object.values(primaryActivities).flat().filter(g=>g.type==='challenge')
+  for(const game of active){
+    const engine=getGameEngine(game.type);let state=engine.initialState()
+    for(const [i,round] of game.rounds.entries()){
+      assert.ok(!prompts.has(round.prompt));prompts.add(round.prompt)
+      state=engine.reduce(state,{type:'choose',index:(round.correct+1)%3},game)
+      assert.equal(state.step,i)
+      assert.equal(state.lastCorrect,false)
+      assert.equal(engine.reduce(state,{type:'next'},game),state)
+      state=engine.reduce(state,{type:'choose',index:round.correct},game)
+      assert.equal(state.lastCorrect,true)
+      assert.equal(state.step,i)
+      assert.equal(engine.reduce(state,{type:'choose',index:(round.correct+1)%3},game),state)
+      state=JSON.parse(JSON.stringify(state))
+      state=engine.reduce(state,{type:'next'},game)
+    }
+    assert.ok(engine.isComplete(state,game))
+    assert.equal(state.history.length,game.rounds.length*2)
+    assert.equal(state.mistakes,game.rounds.length)
+  }
+  assert.equal(prompts.size,active.reduce((sum,g)=>sum+g.rounds.length,0))
+})
+
+test('các xưởng thực hành cần bằng chứng thực nghiệm và không dùng kết quả cũ',()=>{
+  const games=Object.values(primaryActivities).flat().filter(g=>g.type==='workshop')
+  assert.equal(games.length,11)
+  for(const game of games){
+    assert.equal(game.rounds,undefined,`${game.id}: không giữ câu hỏi trắc nghiệm cũ`)
+    assert.deepEqual(game.steps.map(step=>step.kind),['configure','test','compare','explain'])
+    let state=workshop.initialState(game)
+    const act=action=>{state=workshop.reduce(state,action,game)}
+    act({type:'reflection',value:'Em so sánh kết quả trước và sau khi thay đổi dữ liệu hoặc điều kiện.'})
+    act({type:'run'})
+    assert.equal(workshopReady(state,game),false,game.id)
+    if(game.mechanic==='incident-control'){
+      act({type:'incident-action',id:'resume'})
+      assert.deepEqual(state.config.events,[])
+      for(const id of ['pause','inspect','notify','repair','test','repair','approve'])act({type:'incident-action',id})
+      assert.equal(state.config.events.includes('approve'),false,'Sửa tiếp phải vô hiệu phép thử cũ')
+      for(const id of ['test','approve','resume'])act({type:'incident-action',id})
+    }else if(game.mechanic==='solution-builder'){
+      for(const p of game.problems){
+        act({type:'solve',key:`${p.id}-expression`,value:`${p.a}${p.op}${p.b}`})
+        act({type:'solve',key:`${p.id}-answer`,value:String(p.answer)})
+      }
+    }else if(game.mechanic==='service-network'){
+      for(const s of game.samples)act({type:'assign',id:s.id,value:s.truth})
+    }else if(game.mechanic==='robot-control'){
+      act({type:'robot-move',move:'R'})
+      act({type:'robot-move',move:'R'})
+      assert.equal(state.config.path,'R')
+      act({type:'robot-stop'})
+      act({type:'robot-inspect'})
+      act({type:'robot-move',move:'R'})
+      assert.equal(state.config.path,'R')
+      for(const move of ['D','R','R','U'])act({type:'robot-move',move})
+    }else if(game.mechanic==='sampling-budget'){
+      act({type:'toggle-site',id:'sun'})
+      act({type:'toggle-site',id:'shade'})
+    }else if(game.mechanic==='rule-lab'){
+      act({type:'configure',key:'second',value:game.fields[1].id})
+      act({type:'configure',key:'operator',value:'and'})
+    }else if(game.mechanic==='data-repair'){
+      for(const s of game.samples)act({type:'assign',id:s.id,value:s.usable?s.truth:'Loại'})
+    }else if(game.mechanic==='dataset-split'){
+      for(const s of game.samples)act({type:'assign',id:s.id,value:['A','B'].includes(s.origin)?'Học':'Thử'})
+    }else{
+      act({type:'configure',key:game.target,value:game.variables.find(v=>v.id===game.target).values[1]})
+      if(game.mechanic==='counterfactual'){
+        act({type:'run'})
+        assert.equal(workshopReady(state,game),false)
+        act({type:'configure',key:'spots',value:'Có đốm'})
+      }
+    }
+    act({type:'run'})
+    assert.equal(workshopReady(state,game),true,game.id)
+    const valid=workshop.serialize(state)
+    assert.equal(workshopReady(workshop.hydrate(valid,game),game),true)
+    if(game.mechanic==='incident-control')act({type:'incident-action',id:'pause'})
+    else if(game.mechanic==='solution-builder')act({type:'solve',key:`${game.problems[0].id}-answer`,value:'0'})
+    else if(game.mechanic==='service-network')act({type:'assign',id:game.samples[0].id,value:game.samples[0].initial})
+    else if(game.mechanic==='robot-control')act({type:'robot-move',move:'D'})
+    else if(game.mechanic==='sampling-budget')act({type:'toggle-site',id:'sun'})
+    else if(game.samples && ['data-repair','dataset-split'].includes(game.mechanic))act({type:'assign',id:game.samples[0].id,value:'Loại'})
+    else act({type:'configure',key:game.variables?.[0].id||'operator',value:game.variables?.[0].values[0]||'or'})
+    assert.equal(workshopReady(state,game),false,game.id)
+    act({type:'finish'})
+    assert.equal(state.completed,false)
+    assert.equal(workshop.hydrate({...state,completed:true},game).completed,false)
+    state=workshop.hydrate(valid,game)
+    act({type:'finish'})
+    assert.equal(state.completed,true,game.id)
+    assert.equal(workshop.hydrate(workshop.serialize(state),game).completed,true)
+    assert.equal(workshop.hydrate({...state,runs:[null,{config:{}}]},game).completed,false)
+  }
+})
+
+test('trò phân loại và quy trình mới hoàn thành được',()=>{
+  for(const game of Object.values(primaryAdvancedGames).flat().filter(g=>['sorting','sequence'].includes(g.type))){
+    const engine=getGameEngine(game.type);let state=engine.initialState(game)
+    if(game.type==='sorting')for(const item of game.items)state=engine.reduce(state,{type:'answer',group:item.group},game)
+    else for(let index=0;index<game.sequenceItems.length;index++)state=engine.reduce(state,{type:'select',index},game)
+    assert.ok(engine.isComplete(state,game),game.id)
+  }
+})

@@ -1,0 +1,12 @@
+{
+  "name": "Bo-Bo AI K–12",
+  "short_name": "Bo-Bo AI",
+  "description": "Nền tảng học AI trực quan, thực hành và an toàn cho học sinh Việt Nam.",
+  "lang": "vi",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5fbff",
+  "theme_color": "#eef9ff",
+  "icons": [{ "src": "/bobo-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

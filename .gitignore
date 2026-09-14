@@ -1,0 +1,10 @@
+node_modules
+dist
+test-results
+public/audio/high
+public/audio/middle
+public/audio/.tts-manifest-high.json
+public/audio/.tts-manifest-middle.json
+document
+.DS_Store
+*.log
