@@ -1,6 +1,22 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { buildEvidenceReport, reportToCsv } from './evidenceReport.js'
+import { validateTeacherAssessment } from './activityStore.js'
+
+test('đánh giá một phần giữ ô chưa chấm, không tính hoàn tất rubric',()=>{
+  const assessment={ratings:{explanation:2},note:'Đã nghe em giải thích.',reviewedAttemptId:'1'}
+  assert.equal(validateTeacherAssessment(assessment),assessment)
+  for(const ratings of [{},{unknown:2},{testing:0},{testing:null},[]])assert.throws(()=>validateTeacherAssessment({...assessment,ratings}))
+  const record={activityId:'primary-1-1',attemptId:'1',teacherAssessment:assessment}
+  const report=buildEvidenceReport([record])
+  assert.equal(report.summary.teacherReviewed,0)
+  assert.equal(report.summary.teacherPartiallyReviewed,1)
+  assert.ok(reportToCsv(report).split('\n')[0].endsWith('teacherPartiallyReviewed'))
+  assert.ok(reportToCsv(report).split('\n')[1].endsWith('"true"'))
+  assert.equal(report.activities[0].teacherPartiallyReviewed,true)
+  assert.equal(report.activities[0].teacherAssessment.ratings.testing,undefined)
+  assert.equal(buildEvidenceReport([{...record,attemptId:'2'}]).activities[0].teacherPartiallyReviewed,false)
+})
 
 test('report tổng hợp hoàn thành, hint và lỗi thường gặp',()=>{
   const report=buildEvidenceReport([{activityId:'a',status:'complete',score:2,attempts:2,mistakes:1,hintsUsed:1,events:[{type:'interact',correct:false,target:'filter'}],updatedAt:1}])

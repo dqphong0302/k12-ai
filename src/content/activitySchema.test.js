@@ -5,6 +5,30 @@ import { activityRegistry } from './activities.js'
 
 const valid=defineActivity({id:'contract-check',type:'simulation',grade:5,title:'Kiểm contract',description:'Thử một mô hình.',ministry:'NLc',aiApp:'Mô phỏng',standardsRef:'NLc',evidenceRef:'contract-check:evidence',variantRef:'contract-check'})
 
+test('60 tiết Tiểu học giữ mạch chính, mạch phụ và tách mã mở rộng',()=>{
+  const lessons=activityRegistry.filter(item=>item.type==='lesson'&&item.grade<=5)
+  assert.equal(lessons.length,60)
+  for(const lesson of lessons){
+    assert.equal(lesson.strand.code,lesson.content.code,lesson.id)
+    assert.equal(lesson.strandRefs[0],lesson.content.code,lesson.id)
+    assert.deepEqual(lesson.standardRefs,lesson.content.standards.split(' · '))
+    assert.deepEqual(lesson.coreStandardRefs,lesson.standardRefs.filter(ref=>!ref.includes('.MR')))
+    assert.deepEqual(lesson.extensionStandardRefs,lesson.standardRefs.filter(ref=>ref.includes('.MR')))
+  }
+  const byId=id=>lessons.find(item=>item.id===id)
+  for(const id of ['primary-2-6','primary-2-12','primary-4-11'])assert.equal(byId(id).strand.code,'NLa')
+  assert.equal(byId('primary-4-8').strand.code,'NLc')
+  assert.deepEqual(byId('primary-2-12').strandRefs,['NLa','NLb'])
+  assert.deepEqual(byId('primary-5-6').coreStandardRefs,[])
+  assert.deepEqual(byId('primary-5-6').extensionStandardRefs,['5.C5.MR3'])
+  assert.ok(byId('primary-1-3').teacher.setup.some(text=>text.includes('chưa đủ chứng minh có AI')))
+  for(const [id,code] of [['primary-1-6','1.C1.4'],['primary-3-3','3.A1.5']]){
+    assert.ok(byId(id).teacher.setup.some(text=>text.includes(`Minh chứng ${code}`)))
+    assert.ok(byId(id).teacher.offlineAlternative.includes(`Minh chứng ${code}`))
+  }
+  assert.ok(byId('primary-4-5').teacher.setup.some(text=>text.includes('chưa đánh giá MR2')))
+})
+
 test('activity contract mặc định đạt validator chặt',()=>{
   assert.deepEqual(validateActivity(valid),[])
 })

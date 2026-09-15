@@ -26,7 +26,7 @@ export function isActivityWriteConflict(current, incoming, writerId=WRITER_ID) {
 
 export function validateTeacherAssessment(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new TypeError('Đánh giá giáo viên không hợp lệ')
-  if (!value.ratings || typeof value.ratings !== 'object' || !RUBRIC_KEYS.every(key => Number.isInteger(value.ratings[key]) && value.ratings[key] >= 1 && value.ratings[key] <= 3)) throw new TypeError('Cần chấm đủ bốn tiêu chí từ 1 đến 3')
+  if (!value.ratings || typeof value.ratings !== 'object' || Array.isArray(value.ratings) || !Object.keys(value.ratings).length || !Object.entries(value.ratings).every(([key,rating]) => RUBRIC_KEYS.includes(key) && Number.isInteger(rating) && rating >= 1 && rating <= 3)) throw new TypeError('Chỉ chấm các tiêu chí đã quan sát trong bốn tiêu chí, mỗi điểm từ 1 đến 3')
   if (typeof value.note !== 'string' || value.note.length > 1000) throw new TypeError('Nhận xét tối đa 1000 ký tự')
   if (value.reviewedAttemptId !== undefined && (typeof value.reviewedAttemptId !== 'string' || !value.reviewedAttemptId)) throw new TypeError('Mã lượt được đánh giá không hợp lệ')
   if (value.reviewedAt !== undefined && (!Number.isFinite(value.reviewedAt) || value.reviewedAt < 0)) throw new TypeError('Thời điểm đánh giá không hợp lệ')

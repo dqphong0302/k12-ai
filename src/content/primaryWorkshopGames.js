@@ -71,7 +71,7 @@ export const workshopGames = {
   'grade-3-if-then': {
     mechanic:'rule-lab', mechanicLabel:'VIẾT LUẬT & CHẠY THỬ',
     description:'Lắp điều kiện tưới cây, chạy trên sáu ca đất/nước và sửa luật sau khi thấy ca sai.',
-    instruction:'Robot chỉ tưới khi đất khô VÀ bồn còn nước. Hãy tự lắp luật rồi chạy cả sáu ca.',
+    instruction:'Sáu ca thử đã có kết quả đúng mà robot cần đạt. Hãy lắp thử một luật, chạy cả sáu ca, đọc ca nào còn sai rồi đổi điều kiện hoặc toán tử cho tới khi đúng cả sáu.',
     fields:[{id:'dry',label:'Đất khô'},{id:'water',label:'Bồn còn nước'},{id:'sun',label:'Trời nắng'}],
     samples:[
       {id:'a',label:'Đất khô · có nước · nắng',dry:true,water:true,sun:true,expected:true},
@@ -88,7 +88,7 @@ export const workshopGames = {
   'grade-5-rule-tree': {
     mechanic:'rule-lab',mechanicLabel:'LẬP TRÌNH ĐIỀU KIỆN',
     description:'Kết hợp điều kiện, toán tử VÀ/HOẶC rồi kiểm thử bộ phân loại giấy tái chế bằng ca phản ví dụ.',
-    instruction:'Giỏ giấy chỉ nhận vật bằng giấy VÀ sạch. Lắp luật để cả sáu vật đi đúng nhánh.',
+    instruction:'Sáu vật đã có nhánh đúng mà máy cần chọn. Lắp thử một luật, chạy kiểm thử, xem vật nào đi sai nhánh rồi sửa điều kiện hoặc toán tử cho tới khi cả sáu đều đúng.',
     fields:[{id:'paper',label:'Vật bằng giấy'},{id:'clean',label:'Vật sạch'},{id:'white',label:'Vật màu trắng'}],
     samples:[
       {id:'a',label:'Giấy trắng sạch',paper:true,clean:true,white:true,expected:true},

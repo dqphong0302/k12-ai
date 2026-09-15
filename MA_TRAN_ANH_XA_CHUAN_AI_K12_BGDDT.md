@@ -2,10 +2,12 @@
 
 > **Căn cứ pháp lý & hướng dẫn chuyên môn:**
 > 1. **Quyết định số 2422/QĐ-BGDĐT** ngày 18/8/2026 của Bộ trưởng Bộ Giáo dục và Đào tạo ban hành *Khung nội dung giáo dục trí tuệ nhân tạo cho học sinh phổ thông*.
-> 2. **Công văn số 5588/BGDĐT-GDPT** ngày 19/03/2026 của Bộ Giáo dục và Đào tạo về việc *Hướng dẫn triển khai thực hiện nội dung giáo dục trí tuệ nhân tạo cho học sinh phổ thông từ năm học 2026–2027*.
+> 2. **Công văn số 5588/BGDĐT-GDPT** ngày 19/08/2026 của Bộ Giáo dục và Đào tạo về việc *Hướng dẫn triển khai thực hiện nội dung giáo dục trí tuệ nhân tạo cho học sinh phổ thông từ năm học 2026–2027*.
 > 3. **Chương trình Giáo dục phổ thông 2018** (Thông tư 32/2018/TT-BGDĐT) và **Khung năng lực số cho người học** (Thông tư 02/2025/TT-BGDĐT).
 
 ---
+
+Hiệu đính 15/09/2026: ngày CV 5588 được sửa từ 19/03 sang 19/08 theo [Báo điện tử Chính phủ](https://xaydungchinhsach.chinhphu.vn/quyet-dinh-so-2422-qd-bgddt-ve-khung-noi-dung-giao-duc-tri-tue-nhan-tao-ai-cho-hoc-sinh-pho-thong-119260820163256297.htm). Bản OCR nguồn được giữ nguyên và có ghi chú sai khác. Ma trận là ánh xạ nội bộ, chưa phải chứng nhận bao phủ đủ mọi YCCĐ; mã MR là nội dung mở rộng theo quy ước bản nguồn, cần đối chiếu phụ lục ban hành.
 
 ## 1. Hệ thống Mã hóa và 4 Mạch Nội dung Cốt lõi (QĐ 2422)
 
@@ -46,7 +48,7 @@ Hệ thống Bobo AI đáp ứng trọn vẹn cả 3 hình thức tổ chức gi
 |:---:|---|:---:|---|---|
 | 1 | Con người biết cảm xúc | 1.A1.1 · 1.A1.2 | Con người thật sự cảm thấy vui, buồn, sợ hoặc ngạc nhiên. Máy có thể đoán biểu hiện nhưng không trải nghiệm cảm xúc. | Chỉ nét mặt của Mai và Bo-Bo → Kể lúc em từng buồn và được giúp → Chọn một lời hỏi thăm Mai |
 | 2 | Bo-Bo biểu cảm thế nào? | 1.A1.3 · 1.A1.4 · 1.A2.1 · 1.A2.MR1 | Biểu cảm được thiết kế, không phải cảm xúc thật; lời chào thân thiện có thể giúp người dùng thoải mái, dễ hợp tác. | Quan sát mặt và nghe giọng → Đóng vai hai cách chào, so cảm giác của người nghe → Giải thích người thiết kế và lợi ích tương tác |
-| 3 | Nhận ra máy thông minh | 1.A2.2 · 1.A2.3 · 1.C1.1 · 1.C1.2 | Loa có trợ lý, robot hút bụi tránh vật cản và ứng dụng nhận diện hình là ví dụ công cụ AI. Không phải đồ vật chạy điện nào cũng có AI. | Chọn loa trợ lý và quạt công tắc → Nói mỗi đồ vật giúp làm việc gì → Chỉ dấu hiệu nhận biết công cụ có AI |
+| 3 | Nhận ra máy thông minh | 1.A2.2 · 1.A2.3 · 1.C1.1 · 1.C1.2 | Loa xử lý lời nói, ứng dụng nhận diện hình là ví dụ AI. Robot tránh vật cản có thể chỉ theo luật; không suy có AI từ việc chạy điện hoặc hình dáng. | Chọn loa trợ lý và quạt công tắc → Nói mỗi đồ vật giúp làm việc gì → Chỉ dấu hiệu nhận biết công cụ có AI |
 | 4 | Mắt của máy tính | 1.C1.3 · 1.C1.MR1 | Camera nhận hình ảnh như “mắt” của thiết bị. Phần mềm xử lý ảnh mới đưa ra dự đoán; camera không tự hiểu mọi vật. | Chỉ camera trên thiết bị → So sánh ảnh táo rõ và bị che → Dự đoán điều gì giúp máy nhìn rõ hơn |
 | 5 | Tai của máy tính | 1.C1.3 · 1.C1.MR2 | Micro thu âm thanh như “tai” của thiết bị. Giọng nói rõ và ít tiếng ồn giúp hệ thống nghe tốt hơn. | Chỉ micro và loa → So sánh nói từng người với nhiều người cùng nói → Chọn cách giúp máy nhận tiếng rõ |
 | 6 | AI nhận biết quanh em | 1.C1.4 · 1.C1.MR1 · 1.C1.MR2 | AI có thể xử lý hình ảnh hoặc âm thanh, nhận lệnh đơn giản. Kết quả nhận biết vẫn có thể sai. | Chọn ảnh quả bóng và quả cam → Nêu điểm giống và khác → Hỏi người lớn kiểm tra khi máy nhầm |
@@ -119,7 +121,7 @@ Hệ thống Bobo AI đáp ứng trọn vẹn cả 3 hình thức tổ chức gi
 | 9 | Thiết kế giải pháp AI | 5.D1.1 · 5.D2.1 | Giải pháp AI cần vấn đề rõ, dữ liệu phù hợp, tiêu chí đánh giá và người giám sát. Hồ sơ cần ghi cả giới hạn. | Viết vấn đề và người dùng → Lắp dữ liệu, học và kiểm thử → Nêu giới hạn cùng cách người giám sát can thiệp |
 | 10 | Hệ thống AI công bằng | 5.B1.1 · 5.B1.2 | Công bằng cần xem tác động tới nhiều nhóm. Chia đều số mẫu không tự bảo đảm tỷ lệ đúng hay lợi ích bằng nhau. | Cân số mẫu ba nhóm → Đọc tỷ lệ đúng từng nhóm → Nêu nhóm cần xem thêm và lý do |
 | 11 | Giúp AI công bằng | 5.B2.1 · 5.B2.MR1 | Giúp AI công bằng hơn cần dữ liệu đa dạng, tránh định kiến và kiểm tra kết quả theo nhóm. Không bỏ nhóm khó để làm đẹp điểm. | Tìm nhóm có ít ví dụ → Đề xuất nguyên tắc thu dữ liệu đa dạng → Kiểm tra lại kết quả và tác động |
-| 12 | Hiểu cách AI suy nghĩ | 5.B3.1 | Hiểu căn cứ quyết định giúp đánh giá độ tin cậy. Giải thích cần gắn với đặc điểm, phép thử và giới hạn, không chỉ lời khẳng định máy thông minh. | Đặt giả thuyết máy dựa vào nền → Giữ lá, đổi nền và quan sát → Giải thích kết quả cùng điều chưa chắc |
+| 12 | Kiểm tra căn cứ dự đoán của AI | 5.B3.1 | Hiểu căn cứ quyết định giúp đánh giá độ tin cậy. Giải thích cần gắn với đặc điểm, phép thử và giới hạn, không chỉ lời khẳng định máy thông minh. | Đặt giả thuyết máy dựa vào nền → Giữ lá, đổi nền và quan sát → Giải thích kết quả cùng điều chưa chắc |
 
 ---
 

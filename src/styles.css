@@ -114,3 +114,38 @@ body .game-modal :is(p,button,label,input,select,textarea){font-size:13px;line-h
 body .game-modal :is(.modal-ai-label,.game-modal-footer span,.source-cards b,.evidence-progress span){font-size:12px}
 .lesson-modal-footer{display:grid;grid-template-columns:minmax(120px,1fr) auto minmax(120px,1fr);gap:12px}.lesson-modal-footer .lesson-page-button{min-width:0;min-height:48px;padding:11px 16px}.lesson-page-back{display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid color-mix(in srgb,var(--lesson-color) 35%,white);border-radius:14px;background:#fff;color:var(--lesson-color);font-weight:800}.lesson-page-back:disabled{opacity:.35;cursor:not-allowed}.lesson-page-status{justify-self:center;white-space:nowrap}.lesson-page-status b{font-size:17px;color:var(--lesson-color)}
 @media(max-width:600px){.lesson-modal-footer{grid-template-columns:minmax(96px,1fr) auto minmax(106px,1fr);gap:7px;padding:10px 12px}.lesson-modal-footer>span.lesson-page-status{display:flex;font-size:12px}.lesson-modal-footer .lesson-page-button{min-height:50px;padding:9px 10px;font-size:13px}.lesson-page-button svg{width:16px}}
+
+/* ==========================================================================
+   Primary K1-K5 UI/UX Polish: Fullscreen, Highlights, Confetti, Animations
+   ========================================================================== */
+
+/* Fullscreen / Focus Mode */
+.modal-head-actions{display:flex;align-items:center;gap:8px;justify-self:end}
+.modal-fullscreen-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid #dfe9ef;border-radius:10px;background:#fff;color:var(--ink);cursor:pointer;transition:.15s}
+.modal-fullscreen-btn:hover{background:#edf6fb;color:var(--blue);transform:scale(1.05)}
+.is-fullscreen{width:100vw!important;max-width:100vw!important;height:100vh!important;max-height:100vh!important;margin:0!important;border-radius:0!important;position:fixed!important;inset:0!important;z-index:100!important}
+.is-fullscreen .lesson-slide{min-height:calc(100vh - 280px)}
+
+/* Primary Keyword Highlights */
+.kw-highlight{display:inline-block;padding:2px 8px;margin:0 2px;border-radius:8px;background:color-mix(in srgb,var(--lesson-color,var(--game-color,#168fd3)) 14%,white);color:var(--lesson-color,var(--game-color,#0876b9));font-weight:800;border-bottom:2px solid color-mix(in srgb,var(--lesson-color,var(--game-color,#168fd3)) 35%,transparent)}
+
+/* Celebration Confetti & Stars Overlay */
+.celebration-burst{position:fixed;inset:0;pointer-events:none;z-index:999;display:grid;place-items:center;animation:fade-out 2.5s forwards}
+.celebration-star{position:absolute;animation:star-float 2s ease-out forwards;font-size:24px;filter:drop-shadow(0 4px 10px rgba(255,200,0,.5))}
+@keyframes star-float{
+  0%{opacity:1;transform:translate(0,0) scale(.5) rotate(0deg)}
+  50%{opacity:1;transform:translate(var(--tx, 0px), var(--ty, -80px)) scale(1.4) rotate(180deg)}
+  100%{opacity:0;transform:translate(var(--tx, 0px), var(--ty, -140px)) scale(.8) rotate(360deg)}
+}
+@keyframes fade-out{0%{opacity:1}80%{opacity:1}100%{opacity:0;visibility:hidden}}
+
+/* Interactive Enhancements */
+.game-card{transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s ease}
+.game-card:hover{transform:translateY(-5px);box-shadow:0 18px 38px color-mix(in srgb,var(--grade) 16%,transparent)}
+.lesson{transition:transform .18s ease,background .18s ease}
+.lesson:hover{transform:translateY(-2px)}
+.answer{transition:transform .15s ease,border-color .15s ease,background .15s ease}
+.answer:not(:disabled):hover{transform:translateX(4px)}
+.game-option{transition:transform .15s ease,border-color .15s ease}
+.game-option:not(:disabled):hover{transform:translateX(3px)}
+

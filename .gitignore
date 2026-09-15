@@ -8,3 +8,5 @@ public/audio/.tts-manifest-middle.json
 document
 .DS_Store
 *.log
+.claude
+

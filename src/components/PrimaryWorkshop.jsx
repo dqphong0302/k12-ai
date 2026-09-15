@@ -1,7 +1,7 @@
 import React from 'react'
 import { X, Play, RotateCcw, Check } from 'lucide-react'
 import { useActivitySession } from '../runtime/useActivitySession.js'
-import { primaryWorkshopEngine,workshopReady,robotPosition,assignmentChoices,incidentStatus } from '../engines/primaryWorkshopEngine.js'
+import { primaryWorkshopEngine,workshopReady,robotPosition,assignmentChoices,incidentStatus,describeConfig } from '../engines/primaryWorkshopEngine.js'
 import './PrimaryWorkshop.css'
 
 export default function PrimaryWorkshop({game,close,onComplete}) {
@@ -35,7 +35,7 @@ export default function PrimaryWorkshop({game,close,onComplete}) {
       <button id="workshop-run" className="primary" onClick={()=>act({type:'run'})}><Play/> Chạy & lưu lượt {data.runs.length+1}</button>
       {['robot-control','incident-control'].includes(game.mechanic)&&<button id="workshop-restart" className="secondary" onClick={session.restart}><RotateCcw/> Chơi lại từ đầu</button>}
       <p role="status">{data.message}</p>
-      <div className="workshop-runs">{data.runs.map((run,i)=><article key={i}><h3>Lượt {i+1}</h3><p>{Object.entries(run.config).map(([k,v])=>`${k}: ${v}`).join(' · ')}</p><ul>{run.results.map(r=><li key={r.id}><span>{r.label}</span><b>{r.prediction} {r.correct===null?'':r.correct?'✓':'✕'}</b></li>)}</ul><small>{run.message}</small></article>)}</div>
+      <div className="workshop-runs">{data.runs.map((run,i)=><article key={i}><h3>Lượt {i+1}</h3><p>{describeConfig(run.config,game)}</p><ul>{run.results.map(r=><li key={r.id}><span>{r.label}</span><b>{r.prediction} {r.correct===null?'':r.correct?'✓':'✕'}</b></li>)}</ul><small>{run.message}</small></article>)}</div>
       <label className="workshop-reflection" htmlFor="workshop-reflection">{game.reflectionPrompt}<textarea id="workshop-reflection" maxLength={600} value={data.reflection} onChange={e=>act({type:'reflection',value:e.target.value})}/></label>
       <p className="workshop-note">{game.limitation}</p>
       <button id="workshop-finish" className="primary" disabled={!workshopReady(data,game)||data.reflection.trim().length<25} onClick={()=>act({type:'finish'})}>Lưu minh chứng & hoàn thành <Check/></button>

@@ -23,7 +23,7 @@ Các điểm cần cải thiện trước khi dùng rộng rãi:
 
 - Tạo `docs/ma-tran-chuong-trinh-ai.md`: mỗi yêu cầu/mã năng lực của Bộ liên kết với lớp, tiết, mục tiêu, hoạt động, câu hỏi đánh giá và minh chứng.
 - Rà soát lại tên mạch/năng lực, thuật ngữ và độ tuổi theo tài liệu gốc; ghi rõ phần nào là nội dung mở rộng của website.
-- Bổ sung trang/khối “Dành cho giáo viên”: mục tiêu, chuẩn bị, thời lượng, đáp án, rubric 4 mức, phương án không camera và không mạng.
+- Bổ sung trang/khối “Dành cho giáo viên”: mục tiêu, chuẩn bị, thời lượng, đáp án, rubric 3 mức × 4 chiều, phương án không camera và không mạng.
 - Viết chính sách ngắn cho trẻ em: camera xử lý cục bộ, không lưu/gửi ảnh, quyền camera, cách dừng; thêm liên kết chính sách ở footer/modal.
 - Bổ sung transcript cho toàn bộ audio và `aria-label`, focus-visible, điều hướng bàn phím cho modal/quiz/camera.
 - Tạo checklist kiểm thử thủ công cho Chrome/Safari mobile, màn hình 375px, camera bị từ chối, mạng bị ngắt và tải lại trang.

@@ -19,7 +19,8 @@ export function buildEvidenceReport(records) {
     evidenceReady: record.status === 'complete' && Boolean(record.evidence?.length),
     teacherAssessment: record.teacherAssessment || null,
     teacherObserved: Boolean(teacherObservation),
-    teacherReviewed: Boolean(record.teacherAssessment && record.teacherAssessment.reviewedAttemptId === (record.attemptId || String(record.attempts || 0))),
+    teacherReviewed: Boolean(record.teacherAssessment && record.teacherAssessment.reviewedAttemptId === attemptId && ['modeling','testing','explanation','responsibility'].every(key=>Number.isInteger(record.teacherAssessment.ratings?.[key])&&record.teacherAssessment.ratings[key]>=1&&record.teacherAssessment.ratings[key]<=3)),
+    teacherPartiallyReviewed: Boolean(record.teacherAssessment && record.teacherAssessment.reviewedAttemptId === attemptId && Object.keys(record.teacherAssessment.ratings||{}).length>0 && Object.keys(record.teacherAssessment.ratings).length<4),
     artifact: structuredClone(completion?.data ?? record.data ?? {}),
     lastUpdated: record.updatedAt || null
   })})
@@ -32,6 +33,7 @@ export function buildEvidenceReport(records) {
       completed: activities.filter(item => item.status === 'complete').length,
       evidenceReady: activities.filter(item => item.evidenceReady).length,
       teacherReviewed: activities.filter(item => item.teacherReviewed).length,
+      teacherPartiallyReviewed: activities.filter(item => item.teacherPartiallyReviewed).length,
       teacherObserved: activities.filter(item => item.teacherObserved).length,
       attempts: activities.reduce((sum, item) => sum + item.attempts, 0),
       mistakes: activities.reduce((sum, item) => sum + item.mistakes, 0),
@@ -43,7 +45,7 @@ export function buildEvidenceReport(records) {
 }
 
 export function reportToCsv(report) {
-  const header = ['sessionId','learnerOrGroupId','attemptId','activityId','status','evidenceReady','teacherObserved','teacherReviewed','modeling','testing','explanation','responsibility','teacherNote','score','attempts','mistakes','hintsUsed','interactions','lastUpdated']
+  const header = ['sessionId','learnerOrGroupId','attemptId','activityId','status','evidenceReady','teacherObserved','teacherReviewed','modeling','testing','explanation','responsibility','teacherNote','score','attempts','mistakes','hintsUsed','interactions','lastUpdated','teacherPartiallyReviewed']
   const escape = value => `"${String(value ?? '').replaceAll('"','""')}"`
   return [header.join(','), ...report.activities.map(item => header.map(key => escape({
     ...item,

@@ -29,6 +29,23 @@ function validConfig(config,game) {
   return Object.keys(config).length===choices.length && choices.every(c=>c.values.includes(config[c.id]))
 }
 export const onlyChanged = (a,b,key,keys) => a[key]!==b[key]&&keys.filter(k=>k!==key).every(k=>a[k]===b[k])
+// Run logs are read by pupils, so config keys must be shown with their Vietnamese labels.
+export function describeConfig(config,game) {
+  if(game.mechanic==='incident-control')return config.events.length?config.events.map(id=>game.operations.find(o=>o.id===id)?.label||id).join(' → '):'Chưa có thao tác nào'
+  if(game.mechanic==='solution-builder')return game.problems.map(p=>`${p.story.split('.')[0]}: ${config[`${p.id}-expression`]||'—'} = ${config[`${p.id}-answer`]||'—'}`).join(' · ')
+  if(game.mechanic==='robot-control')return `Đường đi: ${[...(config.path||'')].map(move=>({R:'→',L:'←',D:'↓',U:'↑'})[move]).join(' ')||'chưa đi'} · ${config.stopped?'đã dừng':'chưa dừng'} · ${config.inspected?'đã quan sát':'chưa quan sát'}`
+  if(game.mechanic==='sampling-budget'){
+    const picked=game.sites.filter(site=>config[site.id])
+    return picked.length?`Điểm khảo sát: ${picked.map(site=>site.label).join(', ')} · ${picked.reduce((sum,site)=>sum+site.cost,0)}/${game.budget} vé`:'Chưa chọn điểm khảo sát nào'
+  }
+  if(game.mechanic==='rule-lab'){
+    const name=id=>game.fields.find(field=>field.id===id)?.label||id
+    return `NẾU ${name(config.first)} ${config.operator==='and'?'VÀ':'HOẶC'} ${name(config.second)} THÌ ${game.outputs[1]}`
+  }
+  if(usesAssignments(game))return game.samples.map(sample=>`${sample.label}: ${config[sample.id]}`).join(' · ')
+  if(game.variables)return game.variables.map(variable=>`${variable.label}: ${config[variable.id]}`).join(' · ')
+  return Object.entries(config).map(([key,value])=>`${key}: ${value}`).join(' · ')
+}
 export function evaluateWorkshop(state,game) {
   const config=state.config
   if(game.mechanic==='incident-control'){

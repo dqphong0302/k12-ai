@@ -3,6 +3,57 @@ import {primaryLessons} from '../../src/content/primaryLessonActivities.js'
 import {primaryAdvancedGames} from '../../src/content/primaryAdvancedGames.js'
 import {primaryActivities} from '../../src/content/primaryActivities.js'
 
+test('tiểu học chuyển minh chứng sang máy giáo viên độc lập và không nhập trùng',async({page,browser})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.message))
+  await page.goto('/tieu-hoc')
+  await page.locator('#lesson-1-1').click()
+  for(let i=0;i<3;i++)await page.locator('#next-lesson-slide').click()
+  const lesson=primaryLessons.find(item=>item.id==='primary-1-1')
+  await page.locator(`#lesson-answer-${lesson.content.quiz.correct}`).click()
+  await page.locator('#complete-lesson').click()
+  await page.locator('#close-lesson').click()
+  await page.locator('#teacher-tools').click()
+  const pending=page.waitForEvent('download')
+  await page.getByRole('button',{name:'Xuất gói JSON',exact:true}).click()
+  const download=await pending,stream=await download.createReadStream(),chunks=[]
+  for await(const chunk of stream)chunks.push(chunk)
+  const buffer=Buffer.concat(chunks)
+  const context=await browser.newContext()
+  try{
+    const teacher=await context.newPage()
+    teacher.on('pageerror',error=>errors.push(error.message))
+    await teacher.goto('http://127.0.0.1:4173/tieu-hoc')
+    await teacher.locator('#teacher-tools').click()
+    await expect(teacher.locator('#teacher-review-record')).toHaveCount(0)
+    const upload=()=>teacher.locator('#evidence-file').setInputFiles({name:'primary-evidence.json',mimeType:'application/json',buffer})
+    await upload()
+    await teacher.locator('#preview-evidence').click()
+    await teacher.locator('#confirm-evidence-import').click()
+    await expect(teacher.locator('.evidence-import')).toContainText('Đã nhập 1 bản ghi')
+    await teacher.locator('#teacher-review-record').selectOption({label:'default / default / primary-1-1'})
+    await teacher.locator('.teacher-artifact summary').click()
+    await expect(teacher.locator('#teacher-artifact')).toContainText('"quizCorrect": true')
+    await teacher.locator('#teacher-observed-explanation').check()
+    await teacher.locator('#save-teacher-observation').click()
+    await expect(teacher.locator('.teacher-observation')).toContainText('Giáo viên đã nghe giải thích')
+    await teacher.locator('#teacher-rating-explanation').selectOption('2')
+    await teacher.locator('#save-teacher-review').click()
+    await expect(teacher.locator('.review-status')).toContainText('Đã chấm một phần')
+    await upload()
+    await teacher.locator('#preview-evidence').click()
+    await expect(teacher.locator('.evidence-preview')).toContainText('Sẽ thêm 0 bản ghi; giữ 1 bản trùng')
+    await teacher.getByRole('button',{name:'Hủy nhập',exact:true}).click()
+    await teacher.reload()
+    await teacher.locator('#teacher-tools').click()
+    await expect(teacher.locator('.teacher-observation')).toContainText('Giáo viên đã nghe giải thích')
+    await expect(teacher.locator('#teacher-review-record option')).toHaveCount(1)
+    await expect(teacher.locator('#teacher-rating-testing')).toHaveValue('')
+    await expect(teacher.locator('#teacher-rating-explanation')).toHaveValue('2')
+    await expect(teacher.locator('.review-status')).toContainText('Đã chấm một phần')
+    expect(errors).toEqual([])
+  }finally{await context.close()}
+})
+
 test('khảo sát lớp 4: ngân sách, nhóm thiếu và khôi phục kế hoạch',async({page})=>{
   const errors=[];page.on('pageerror',error=>errors.push(error.message))
   await page.goto('/tieu-hoc')
@@ -184,4 +235,41 @@ test('8 thẻ mỗi lớp không tràn màn hình và trang chờ vẫn giữ ng
     await page.goto(path)
     await expect(page.getByRole('heading',{name:'Đang chờ lên kế hoạch'})).toBeVisible()
   }
+})
+
+const roundGameTypes=['memory','sound','route','assembly']
+for(const grade of [1,2])test(`lớp ${grade}: trò nhớ mẫu che đáp án, nút xáo trộn và chơi hết được`,async({page})=>{
+  test.setTimeout(120000)
+  const errors=[];page.on('pageerror',error=>errors.push(error.message))
+  await page.goto('/tieu-hoc')
+  await page.locator(`#grade-${grade}`).click()
+  // Buttons are shuffled at mount, so the first option is not a reliable answer any more.
+  // This has to run before the play-through below, which leaves the games finished.
+  const soundGame=grade===1?'sound-secret':'sound-lab-journey'
+  const orders=[]
+  for(let attempt=0;attempt<8;attempt++){
+    await page.locator(`#game-${grade}-${soundGame}`).click()
+    // The game modal is lazy-loaded, so wait for the buttons before reading their order.
+    await expect(page.locator('.new-game-options button')).toHaveCount(3)
+    orders.push((await page.locator('.new-game-options button').allInnerTexts()).join('|'))
+    await page.locator('#close-game').click()
+  }
+  expect(new Set(orders).size).toBeGreaterThan(1)
+  for(const game of primaryActivities[grade].filter(item=>roundGameTypes.includes(item.type))){
+    await page.locator(`#game-${grade}-${game.id}`).click()
+    await page.locator('#close-game').waitFor()
+    for(const round of game.rounds){
+      const answers=Array.isArray(round.correct)?round.correct:[round.correct]
+      if(game.type==='memory'){
+        // The pattern is only visible while studying; it must be hidden once the child answers.
+        await expect(page.locator('.sequence-preview')).toContainText(round.correct.join('  '))
+        await page.locator('#memory-ready').click()
+        await expect(page.locator('.sequence-preview')).toHaveCount(0)
+      }
+      for(const answer of answers)await page.locator('.new-game-options button',{hasText:answer}).first().click()
+    }
+    await expect(page.locator('.game-complete')).toBeVisible()
+    await page.locator('#game-finish').click()
+  }
+  expect(errors).toEqual([])
 })

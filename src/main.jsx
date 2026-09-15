@@ -2,10 +2,11 @@ import StorageNotice from './components/StorageNotice'
 import { readProgress, reportStorageWarning, writeProgress } from './runtime/progressStorage'
 import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { ArrowLeft, ArrowRight, BookOpen, Bot, Camera, Check, CirclePlay, Clock3, ExternalLink, Eye, Images, Lightbulb, LockKeyhole, Menu, Pause, Play, Presentation, RotateCcw, ShieldCheck, Sparkles, Star, Trophy, Volume2, X, Zap } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BookOpen, Bot, Camera, Check, CirclePlay, Clock3, ExternalLink, Eye, Images, Lightbulb, LockKeyhole, Maximize2, Menu, Minimize2, Pause, Play, Presentation, RotateCcw, ShieldCheck, Sparkles, Star, Trophy, Volume2, X, Zap } from 'lucide-react'
 import './styles.css'
-import { getLessonAudioPath, getLessonContent, grades, strands } from './lessonContent'
+import { getLessonAudioPath, getLessonContent, grades } from './lessonContent'
 import { useVietnameseSpeech } from './useVietnameseSpeech'
+import { playCorrectSound, playWrongSound, playVictorySound, playPopSound } from './runtime/audioEffects'
 import { primaryActivities as interactiveGames } from './content/primaryActivities'
 import { activityReducer, createActivityState, scoreForMistakes } from './runtime/activityRuntime'
 import { simulationEngine } from './engines/simulationEngine'
@@ -296,7 +297,6 @@ function App() {
           </div>
 
           <div className="lesson-grid">{selected.titles.map((title, index) => {
-            const strand = strands[Math.floor(index / 3)]
             const done = completed[`${grade}-${index + 1}`]
             return <button id={`lesson-${grade}-${index + 1}`} className={done ? 'lesson done' : 'lesson'} key={title} onClick={() => setLesson(getActivity(`primary-${grade}-${index + 1}`))} aria-label={`Mở tiết ${index + 1}: ${title}${done ? '. Đã hoàn thành' : ''}`}><span className="lesson-no">{done ? <Check size={17}/> : index + 1}</span><span><small>{getActivity(`primary-${grade}-${index + 1}`).ministry} · Mở bài học</small>{title}</span><ArrowRight className="lesson-arrow" size={16}/></button>
           })}</div>
@@ -316,7 +316,7 @@ function App() {
               'emotion-detective': '12 TÌNH HUỐNG · PHÂN BIỆT TINH Ý',
               'little-data-knight': '14 TÌNH HUỐNG · BẢO VỆ THÔNG TIN · ~18 PHÚT',
               'pattern-garden': '4 CHUỖI MẪU · NHỚ VÀ LẶP LẠI',
-              'sound-secret': '4 ÂM THANH · NGHE VÀ GHÉP',
+              'sound-secret': '4 MÔ TẢ ÂM THANH · ĐOÁN NGUỒN',
               'sensor-path': '4 CHẶNG · ĐỌC TÍN HIỆU',
               'robot-workshop': '4 BỘ PHẬN · LẮP ĐÚNG VAI TRÒ'
             }
@@ -327,7 +327,7 @@ function App() {
               'robot-command-debug': '6 BLOCK · TÌM LỆNH GÂY LỖI',
               'safe-share-ranger': '12 THẺ · QUYẾT ĐỊNH AN TOÀN',
               'pattern-lanterns': '6 CHUỖI · MẪU DÀI DẦN',
-              'sound-lab-journey': '6 ÂM THANH · LỰA CHỌN GẦN GIỐNG',
+              'sound-lab-journey': '6 MÔ TẢ ÂM THANH · LỰA CHỌN GẦN GIỐNG',
               'sensor-river-route': '6 CHẶNG · KẾT HỢP TÍN HIỆU'
             }
             const badge = grade===1 ? gradeOneBadges[item.id] : grade===2 ? gradeTwoBadges[item.id] : `TRẠM ${index + 1} · ${item.rounds ? `${item.rounds.length} TÌNH HUỐNG` : 'THỰC HÀNH TƯƠNG TÁC'}`
@@ -391,6 +391,7 @@ function App() {
 
 function GameModal({ game, best, close, onComplete }) {
   const settings = useLearningSettings()
+  const [fullscreen, setFullscreen] = useState(false)
   const gameEngine = getGameEngine(game.type)
   const gameTitle = game.id==='bobo-first-code'&&!game.extended ? 'Robot tìm đường bằng block' : game.title
   const gameDescription = game.id==='bobo-first-code'&&!game.extended ? 'Ghép block, tự dự đoán đường đi rồi chạy chương trình của Bo-Bo.' : game.description
@@ -438,18 +439,37 @@ function GameModal({ game, best, close, onComplete }) {
     if (runtimeReady && game.type === 'code') dispatchActivity({ type: 'snapshot', data: { program, position: robot, predictedDestination, executionStep, positions: executionPositions, outside: false, runs: programRuns, removedBlocks }, mistakes })
   }, [executionPositions, executionStep, game.type, mistakes, predictedDestination, program, programRuns, removedBlocks, robot, runtimeReady])
   const stars = Math.max(1, mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1)
-  const finishGame = (earned, artifact=activityState.data) => { dispatchActivity({ type: 'complete', score: earned, evidence:{kind:'activity-complete',data:structuredClone(artifact)} }); setEarnedStars(earned); onComplete(earned); setComplete(true) }
+  const finishGame = (earned, artifact=activityState.data) => {
+    dispatchActivity({ type: 'complete', score: earned, evidence:{kind:'activity-complete',data:structuredClone(artifact)} })
+    setEarnedStars(earned)
+    onComplete(earned)
+    playVictorySound(settings.audio)
+    setComplete(true)
+  }
   const selectObject = (item, index) => {
     if (activityState.data.found.includes(index) || complete) return
+    playPopSound(settings.audio)
     const nextData = simulationEngine.reduce(activityState.data, { type: 'select', index }, game)
     const correct = Boolean(item.target)
     dispatchActivity({ type: 'interact', correct, target: item.label, data: nextData, evidence: correct ? { kind: 'identified-sensor', label: item.label } : undefined })
     setMessage(simulationEngine.getFeedback(nextData))
-    if (!correct) { setMistakes(value => value + 1); return }
+    if (!correct) {
+      playWrongSound(settings.audio)
+      setMistakes(value => value + 1)
+      return
+    }
+    playCorrectSound(settings.audio)
     if (simulationEngine.isComplete(nextData, game)) finishGame(scoreForMistakes(activityState.mistakes),nextData)
   }
   const resetExecution = () => { setRobot(game.start); setExecutionStep(0); setExecutionPositions([[...game.start]]) }
-  const addBlock = key => { if (!running && !complete && program.length < 8) { setProgram(value => [...value, key]); resetExecution(); setMessage('') } }
+  const addBlock = key => {
+    if (!running && !complete && program.length < 8) {
+      playPopSound(settings.audio)
+      setProgram(value => [...value, key])
+      resetExecution()
+      setMessage('')
+    }
+  }
   const finishProgramRun = (evaluation, mode) => {
     const nextRuns = programRuns + 1
     setProgramRuns(nextRuns)
@@ -459,11 +479,13 @@ function GameModal({ game, best, close, onComplete }) {
       finishGame(stars,{program:[...program],predictedDestination:[...predictedDestination],predictionMatched,executionMode:mode,position:evaluation.position,positions:evaluation.positions,outside:false,runs:nextRuns,removedBlocks:[...removedBlocks]})
       return
     }
+    playWrongSound(settings.audio)
     setMistakes(value => value + 1);resetExecution()
     setMessage(evaluation.outside ? 'Chưa đúng: Bo-Bo đi ra ngoài sân khấu vì chuỗi lệnh vượt quá số ô. Em bỏ block gây sai rồi thử lại nhé!' : reachedGoal ? 'Chưa đúng: Bo-Bo tới ngôi sao nhưng ô dự đoán chưa khớp. Dự đoán cần mô tả đúng kết quả của chương trình.' : 'Chưa đúng: Bo-Bo chưa tới ngôi sao vì chuỗi lệnh chưa đủ hoặc sai hướng. Em bỏ hoặc đổi block rồi thử lại nhé!')
   }
   const runProgram = async () => {
     if (!program.length || !predictedDestination || running) return
+    playPopSound(settings.audio)
     setRunning(true); setMessage('Bo-Bo đang chạy chương trình của em…')
     const evaluation = evaluateGridProgram(game, program, moveBlocks)
     setExecutionPositions(evaluation.positions)
@@ -473,6 +495,7 @@ function GameModal({ game, best, close, onComplete }) {
   }
   const stepProgram = () => {
     if (!program.length || !predictedDestination || running) return
+    playPopSound(settings.audio)
     const moves=expandProgram(program,moveBlocks),nextStep=Math.min(executionStep+1,moves.length)
     const evaluation=evaluateGridMoves(game,moves.slice(0,nextStep))
     setExecutionStep(nextStep);setExecutionPositions(evaluation.positions)
@@ -480,18 +503,24 @@ function GameModal({ game, best, close, onComplete }) {
     if(evaluation.outside||nextStep===moves.length)finishProgramRun(evaluation,'step-by-step')
     else setMessage(`Đã chạy ${nextStep}/${moves.length} bước. Em quan sát rồi chạy bước tiếp theo.`)
   }
-  const undoProgram = () => { const removed=program.at(-1);if(removed)setRemovedBlocks(value=>[...value,removed]);setProgram(value => value.slice(0,-1));resetExecution();setMessage('Em đã bỏ block cuối. Hãy kiểm tra dự đoán rồi chạy lại.') }
+  const undoProgram = () => {
+    playPopSound(settings.audio)
+    const removed=program.at(-1);if(removed)setRemovedBlocks(value=>[...value,removed]);setProgram(value => value.slice(0,-1));resetExecution();setMessage('Em đã bỏ block cuối. Hãy kiểm tra dự đoán rồi chạy lại.')
+  }
   const replay = () => { dispatchActivity({ type: 'reset', activity: game, data: gameEngine?.initialState(game) || {} }); dispatchActivity({ type: 'start' }); setMistakes(0); setMessage(''); setProgram([]); setPredictedDestination(null);resetExecution();setProgramRuns(0);setRemovedBlocks([]);setRunning(false);setEarnedStars(3);setComplete(false) }
 
   return <div className="modal-backdrop game-backdrop" role="presentation" onMouseDown={event => event.target === event.currentTarget && close()}>
-    <section className="game-modal rich-game-modal" role="dialog" aria-modal="true" aria-labelledby="game-title" style={{ '--game-color': game.color }}>
-      <button id="close-game" className="close" onClick={close} aria-label="Đóng trò chơi"><X/></button>
+    <section className={fullscreen ? "game-modal rich-game-modal is-fullscreen" : "game-modal rich-game-modal"} role="dialog" aria-modal="true" aria-labelledby="game-title" style={{ '--game-color': game.color }}>
+      <div className="modal-head-actions">
+        <button type="button" className="modal-fullscreen-btn" aria-label={fullscreen ? "Thu nhỏ" : "Toàn màn hình"} onClick={()=>setFullscreen(!fullscreen)}>{fullscreen ? <Minimize2 size={16}/> : <Maximize2 size={16}/>}</button>
+        <button id="close-game" className="close" onClick={close} aria-label="Đóng trò chơi"><X/></button>
+      </div>
       {!complete ? <>
         <header className="game-modal-head"><span className="game-hero-icon" aria-hidden="true">{game.icon}</span><div><small>TRÒ CHƠI LỚP {game.grade} · {game.ministry}</small><h2 id="game-title">{gameTitle}</h2><p>{gameDescription}</p><span className="modal-ai-label"><Bot size={14}/> Đang dùng: {game.aiApp}</span></div></header>
         {runtimeReady && <aside className="primary-game-help"><button type="button" disabled={activityState.hintsUsed >= game.hints.length || (settings.difficulty==='challenge'&&!activityState.mistakes)} onClick={()=>dispatchActivity({type:'hint'})}><Lightbulb size={14}/> {activityState.hintsUsed ? `Gợi ý cấp ${activityState.hintsUsed}` : 'Mở gợi ý'}</button><p aria-live="polite">{activityState.hintsUsed ? game.hints[Math.min(activityState.hintsUsed,game.hints.length)-1] : settings.difficulty==='guided'?game.hints[0]:settings.difficulty==='challenge'?'Chế độ thử thách: gợi ý mở sau lần thử sai đầu tiên.':'Tiến trình được lưu tự động trên thiết bị.'}</p></aside>}
-        {!runtimeReady ? <p className="game-message" role="status">Đang khôi phục hoạt động…</p> : game.extended&&game.id==='sensor-safari' ? <SensorSafariQuest game={game} onMistake={()=>setMistakes(value=>value+1)} onFinish={(artifact,totalMistakes)=>finishGame(scoreForMistakes(totalMistakes),artifact)}/> : game.extended&&game.id==='bobo-first-code' ? <StarMazeQuest game={game} onMistake={()=>setMistakes(value=>value+1)} onFinish={(artifact,totalMistakes)=>finishGame(scoreForMistakes(totalMistakes),artifact)}/> : game.type === 'simulation' ? <SimulationGame game={game} found={activityState.data.found} message={message} onSelect={selectObject}/> : game.type === 'code' ? <CodeGame game={game} program={program} robot={robot} predictedDestination={predictedDestination} executionStep={executionStep} running={running} message={message} onPredict={position=>{setPredictedDestination(position);setMessage(`Em dự đoán Bo-Bo sẽ dừng ở cột ${position[0]+1}, hàng ${position[1]+1}.`)}} onAdd={addBlock} onUndo={undoProgram} onReset={() => { setProgram([]);setPredictedDestination(null);resetExecution();setMessage('') }} onStep={stepProgram} onRun={runProgram}/> : <MechanicGame game={game} initialState={activityState.data} onStateChange={state=>dispatchActivity({type:'snapshot',data:state,mistakes:state.mistakes})} onFinish={finishGame} onMistake={() => setMistakes(value => value + 1)}/>} 
+        {!runtimeReady ? <p className="game-message" role="status">Đang khôi phục hoạt động…</p> : game.extended&&game.id==='sensor-safari' ? <SensorSafariQuest game={game} onMistake={()=>setMistakes(value=>value+1)} onFinish={(artifact,totalMistakes)=>finishGame(scoreForMistakes(totalMistakes),artifact)}/> : game.extended&&game.id==='bobo-first-code' ? <StarMazeQuest game={game} onMistake={()=>setMistakes(value=>value+1)} onFinish={(artifact,totalMistakes)=>finishGame(scoreForMistakes(totalMistakes),artifact)}/> : game.type === 'simulation' ? <SimulationGame game={game} found={activityState.data.found} message={message} onSelect={selectObject}/> : game.type === 'code' ? <CodeGame game={game} program={program} robot={robot} predictedDestination={predictedDestination} executionStep={executionStep} running={running} message={message} onPredict={position=>{playPopSound(settings.audio);setPredictedDestination(position);setMessage(`Em dự đoán Bo-Bo sẽ dừng ở cột ${position[0]+1}, hàng ${position[1]+1}.`)}} onAdd={addBlock} onUndo={undoProgram} onReset={() => { playPopSound(settings.audio);setProgram([]);setPredictedDestination(null);resetExecution();setMessage('') }} onStep={stepProgram} onRun={runProgram}/> : <MechanicGame game={game} initialState={activityState.data} onStateChange={state=>dispatchActivity({type:'snapshot',data:state,mistakes:state.mistakes})} onFinish={finishGame} onMistake={() => setMistakes(value => value + 1)}/>} 
         <footer className="game-modal-footer"><span>{best ? `Kỷ lục: ${best}/3 sao` : 'Chạm, thử và sửa — em đang học như một nhà sáng tạo!'}</span><div className="live-stars"><Star size={17} fill="currentColor"/> {Math.max(1, 3 - Math.min(2, mistakes))}/3 sao</div></footer>
-      </> : <div className="game-complete"><span className="reward-cup"><Trophy/></span><small>HOÀN THÀNH THỬ THÁCH</small><h2 id="game-title">Tuyệt lắm, nhà sáng tạo!</h2><p>Em đã hoàn thành nhiệm vụ và nhận được</p><div className="reward-stars" aria-label={`${earnedStars} sao`}>{[1, 2, 3].map(value => <Star key={value} fill={value <= earnedStars ? 'currentColor' : 'none'}/>)}</div><div className="complete-actions"><button id="game-replay" className="secondary" onClick={replay}><RotateCcw size={17}/> Chơi lại</button><button id="game-finish" className="primary" onClick={close}>Nhận sao <Check size={17}/></button></div></div>}
+      </> : <div className="game-complete"><CelebrationBurst/><span className="reward-cup"><Trophy/></span><small>HOÀN THÀNH THỬ THÁCH</small><h2 id="game-title">Tuyệt lắm, nhà sáng tạo!</h2><p>Em đã hoàn thành nhiệm vụ và nhận được</p><div className="reward-stars" aria-label={`${earnedStars} sao`}>{[1, 2, 3].map(value => <Star key={value} fill={value <= earnedStars ? 'currentColor' : 'none'}/>)}</div><div className="complete-actions"><button id="game-replay" className="secondary" onClick={replay}><RotateCcw size={17}/> Chơi lại</button><button id="game-finish" className="primary" onClick={close}>Nhận sao <Check size={17}/></button></div></div>}
     </section>
   </div>
 }
@@ -563,7 +592,7 @@ function StarMazeQuest({game,onMistake,onFinish}) {
   const run=async()=>{if(!program.length||!predictedDestination||running||levelArtifact)return;setRunning(true);setMessage('Bo-Bo đang đi tìm ngôi sao…');const evaluation=evaluateGridProgram(activeGame,program,moveBlocks);for(const [index,position] of evaluation.positions.slice(1).entries()){setRobot(position);setExecutionStep(index+1);await new Promise(resolve=>setTimeout(resolve,260))}setRunning(false);finishRun(evaluation,'continuous')}
   const step=()=>{if(!program.length||!predictedDestination||running||levelArtifact)return;const nextStep=Math.min(executionStep+1,moves.length),evaluation=evaluateGridMoves(activeGame,moves.slice(0,nextStep));setExecutionStep(nextStep);if(!evaluation.outside)setRobot(evaluation.position);if(evaluation.outside||nextStep===moves.length)finishRun(evaluation,'step-by-step');else setMessage(`Đã đi ${nextStep}/${moves.length} bước.`)}
   const advance=()=>{const levels=[...completedLevels,levelArtifact];if(levelIndex===game.levels.length-1){onFinish({levels,completedLevels:levels.length,mistakes},mistakes);return}setCompletedLevels(levels);const nextIndex=levelIndex+1;setLevelIndex(nextIndex);setProgram([]);setRobot(game.levels[nextIndex].start);setPredictedDestination(null);setExecutionStep(0);setMessage('');setLevelArtifact(null)}
-  return <div className="star-maze-quest"><div className="quest-progress"><span>MÊ CUNG 10 NGÔI SAO · ~15 PHÚT</span><b>Level {levelIndex+1}/{game.levels.length}</b><i><em style={{width:`${(levelIndex+(levelArtifact?1:0))/game.levels.length*100}%`}}/></i></div><CodeGame game={activeGame} program={program} robot={robot} predictedDestination={predictedDestination} executionStep={executionStep} running={running} message={message} onPredict={position=>{if(!levelArtifact){setPredictedDestination(position);setMessage(`Em dự đoán ô cột ${position[0]+1}, hàng ${position[1]+1}.`)}}} onAdd={key=>{if(!running&&!levelArtifact&&program.length<10){setProgram(value=>[...value,key]);setRobot(level.start);setExecutionStep(0);setMessage('')}}} onUndo={()=>{if(!levelArtifact){setProgram(value=>value.slice(0,-1));setRobot(level.start);setExecutionStep(0);setMessage('Đã bỏ block cuối.')}}} onReset={reset} onStep={step} onRun={run}/>{levelArtifact&&<div className="level-cleared"><span>⭐</span><div><small>ĐÃ TÌM THẤY NGÔI SAO</small><b>{levelIndex===game.levels.length-1?'Em đã vượt đủ 10 level!':`Sẵn sàng sang level ${levelIndex+2}`}</b></div><button id="next-maze-level" className="primary" onClick={advance}>{levelIndex===game.levels.length-1?'Hoàn thành':'Level tiếp'} <ArrowRight size={16}/></button></div>}</div>
+  return <div className="star-maze-quest"><div className="quest-progress"><span>MÊ CUNG {game.levels.length} NGÔI SAO · ~18 PHÚT</span><b>Level {levelIndex+1}/{game.levels.length}</b><i><em style={{width:`${(levelIndex+(levelArtifact?1:0))/game.levels.length*100}%`}}/></i></div><CodeGame game={activeGame} program={program} robot={robot} predictedDestination={predictedDestination} executionStep={executionStep} running={running} message={message} onPredict={position=>{if(!levelArtifact){setPredictedDestination(position);setMessage(`Em dự đoán ô cột ${position[0]+1}, hàng ${position[1]+1}.`)}}} onAdd={key=>{if(!running&&!levelArtifact&&program.length<10){setProgram(value=>[...value,key]);setRobot(level.start);setExecutionStep(0);setMessage('')}}} onUndo={()=>{if(!levelArtifact){setProgram(value=>value.slice(0,-1));setRobot(level.start);setExecutionStep(0);setMessage('Đã bỏ block cuối.')}}} onReset={reset} onStep={step} onRun={run}/>{levelArtifact&&<div className="level-cleared"><span>⭐</span><div><small>ĐÃ TÌM THẤY NGÔI SAO</small><b>{levelIndex===game.levels.length-1?`Em đã vượt đủ ${game.levels.length} level!`:`Sẵn sàng sang level ${levelIndex+2}`}</b></div><button id="next-maze-level" className="primary" onClick={advance}>{levelIndex===game.levels.length-1?'Hoàn thành':'Level tiếp'} <ArrowRight size={16}/></button></div>}</div>
 }
 
 function SimulationGame({ game, found, message, onSelect }) {
@@ -579,13 +608,44 @@ function CodeGame({ game, program, robot, predictedDestination, executionStep, r
   return <div className="code-game"><div className="scratch-guide"><Lightbulb/><div><small>BO-BO HƯỚNG DẪN · CẤP {game.grade}</small><b>{game.hint}</b></div></div><AIConsole label="MÔ PHỎNG ĐƯỜNG ĐI" prediction={prediction} note="Ghép lệnh, chọn ô em dự đoán rồi quan sát từng bước. Đây không phải mô hình AI."/><div className="code-layout"><section className="code-stage" aria-label="Sân khấu lập trình"><img className="code-world" src={`/images/game-grade-${game.grade}.png`} alt=""/><div className="grid-board prediction-board" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>{Array.from({ length: columns * rows }, (_, index) => { const x = index % columns; const y = Math.floor(index / columns); const isRobot = robot[0] === x && robot[1] === y; const isGoal = game.goal[0] === x && game.goal[1] === y; const isPrediction=predictedDestination?.[0]===x&&predictedDestination?.[1]===y;return <button id={`predict-cell-${x}-${y}`} type="button" key={index} className={`${isGoal ? 'goal-cell' : ''} ${isPrediction?'predicted-cell':''}`} aria-pressed={isPrediction} aria-label={`Dự đoán ô cột ${x+1}, hàng ${y+1}${isGoal?', có ngôi sao':''}`} disabled={running} onClick={()=>onPredict([x,y])}>{isGoal && '⭐'}{isPrediction&&<i>?</i>}{isRobot && <b className="grid-robot">🤖</b>}</button> })}</div><small>2 · CHỌN Ô DỰ ĐOÁN {predictedDestination?'✓':''}</small></section><section className="scratch-workspace"><div className="block-palette"><small>1 · CHỌN BLOCK</small>{game.palette.map(key => <button id={`code-block-${key}`} key={key} className={`scratch-block block-${key}`} disabled={running} onClick={() => onAdd(key)}><b>{moveBlocks[key].icon}</b>{moveBlocks[key].label}</button>)}</div><div className="script-area"><div className="script-head">🟨 Khi bấm cờ xanh</div><div className="script-stack">{program.length ? program.map((key, index) => <div className={`placed-block block-${key}`} key={`${key}-${index}`}><span>{index + 1}</span>{moveBlocks[key].icon} {moveBlocks[key].label}</div>) : <p>Chạm vào block bên trái để ghép chương trình.</p>}</div></div></section></div><div className="code-controls"><button id="code-undo" className="secondary" disabled={!program.length || running} onClick={onUndo}>↶ Bỏ block cuối</button><button id="code-reset" className="secondary" disabled={running} onClick={onReset}><RotateCcw size={16}/> Làm lại</button><button id="code-step" className="secondary" disabled={!program.length || !predictedDestination || running} onClick={onStep}>Một bước ({executionStep}/{predictedMoves.length})</button><button id="code-run" className="primary" disabled={!program.length || !predictedDestination || running} onClick={onRun}>{running ? 'Bo-Bo đang chạy…' : '▶ Chạy hết'}</button></div><p className={`game-message ${message.includes('đang chạy') ? 'success' : ''}`} aria-live="polite">{message || (predictedDestination?'Chạy từng bước hoặc chạy hết để kiểm tra dự đoán.':'Ghép block rồi chọn một ô em dự đoán Bo-Bo sẽ dừng.')}</p></div>
 }
 
+function CelebrationBurst() {
+  const stars = useMemo(() => Array.from({ length: 14 }, (_, i) => ({
+    id: i,
+    icon: ['⭐', '✨', '🎉', '🌟', '🏆', '🎯'][i % 6],
+    tx: `${(Math.sin(i) * 160).toFixed(0)}px`,
+    ty: `${(-70 - (i % 5) * 25).toFixed(0)}px`,
+    delay: `${(i * 0.08).toFixed(2)}s`
+  })), [])
+  return <div className="celebration-burst" aria-hidden="true">{stars.map(s => <span key={s.id} className="celebration-star" style={{ '--tx': s.tx, '--ty': s.ty, animationDelay: s.delay }}>{s.icon}</span>)}</div>
+}
+
+function highlightPrimaryKeywords(text) {
+  if (!text || typeof text !== 'string') return text
+  const keywords = ['Camera', 'Micro', 'Loa', 'Màn hình', 'cảm xúc thật', 'biểu cảm', 'quy tắc', 'mô hình', 'dữ liệu', 'mật khẩu', 'thông tin cá nhân', 'kiểm chứng', 'công bằng', 'con người', 'AI']
+  const regex = new RegExp(`(${keywords.join('|')})`, 'gi')
+  const parts = text.split(regex)
+  if (parts.length === 1) return text
+  return parts.map((part, i) => {
+    const isMatch = keywords.some(k => k.toLowerCase() === part.toLowerCase())
+    return isMatch ? <span key={i} className="kw-highlight">{part}</span> : part
+  })
+}
+
 function AIConsole({ label, prediction, confidence, note }) {
   return <aside className="ai-console" aria-live="polite"><span className="ai-console-icon"><Bot/></span><div><small>{label}</small><strong>{prediction}</strong>{note && <p>{note}</p>}</div>{confidence !== undefined && <span className="ai-confidence">{confidence}%<small>tin cậy</small></span>}</aside>
 }
 
+const ROUND_GAMES = ['memory', 'sound', 'route', 'assembly']
+const roundOptions = round => round.options || round.cards || round.parts
+
 function MechanicGame({ game, initialState, onStateChange, onFinish, onMistake }) {
+  const settings = useLearningSettings()
   const engine = getGameEngine(game.type)
   const [state, dispatch] = useReducer((current, action) => engine.reduce(current, action, game), initialState || engine.initialState(game))
+  // Answers are matched by value, so the buttons can be re-ordered: without this the
+  // correct choice sits first in almost every round and can be won by always tapping left.
+  const optionOrder = useMemo(() => ROUND_GAMES.includes(game.type) ? game.rounds.map(round => shuffled(roundOptions(round))) : null, [game.id])
+  const [memorised, setMemorised] = useState(-1)
   const step = state.step || 0
   const errors = state.mistakes || 0
   const selected = state.selected || []
@@ -594,9 +654,15 @@ function MechanicGame({ game, initialState, onStateChange, onFinish, onMistake }
   const feedback = engine.getFeedback(state, game)
   const ai = getMechanicAI(game, step, selected, counts, ready)
   const commit = action => {
+    playPopSound(settings.audio)
     const next = engine.reduce(state, action, game)
     if (next === state) return state
-    if ((next.mistakes || 0) > errors) onMistake()
+    if ((next.mistakes || 0) > errors) {
+      playWrongSound(settings.audio)
+      onMistake()
+    } else {
+      playCorrectSound(settings.audio)
+    }
     dispatch(action)
     onStateChange(next)
     return next
@@ -654,17 +720,20 @@ function MechanicGame({ game, initialState, onStateChange, onFinish, onMistake }
     const checkBalance = () => commit({ type: 'check' })
     return <GameShell game={game} ai={ai} progress={`${used}/${game.total}`} instruction="Thêm dữ liệu rồi kiểm tra mức đại diện" feedback={feedback}><div className="balance-scale">{game.groups.map((group, index) => <article key={group}><span>{['👧🏻','👦🏽','👧🏿'][index]}</span><b>{group}</b><strong>{counts[index]}</strong><div><button id={`balance-remove-${index}`} disabled={!counts[index]} onClick={() => commit({type:'remove',group:index})}>−</button><button id={`balance-add-${index}`} disabled={used >= game.total} onClick={() => commit({type:'add',group:index})}>+</button></div></article>)}</div><button id="balance-check" className="primary mechanic-check" disabled={used < game.total} onClick={checkBalance}>⚖️ Kiểm tra dữ liệu</button>{state.auditResults.length>0&&<div className="group-audit"><h3>Kết quả trên cùng 10 mẫu kiểm thử mỗi nhóm</h3>{state.auditResults.map(result=><p key={result.group}><b>{result.group}</b><span>{result.correct}/{result.total} dự đoán đúng</span><strong>{result.accuracy}%</strong></p>)}<small>Ba nhóm có cùng số mẫu học nhưng tỷ lệ đúng vẫn khác nhau. Cần xem loại lỗi, bối cảnh và tác động trước khi kết luận công bằng.</small></div>}{ready&&<button id="accept-representation-audit" className="primary mechanic-check" onClick={()=>onFinish(scoreForMistakes(errors),state)}>Em đã xem kết quả theo nhóm</button>}</GameShell>
   }
-  if (['memory','sound','route','assembly'].includes(game.type)) {
+  if (ROUND_GAMES.includes(game.type)) {
     const round = game.rounds[step]
-    const options = round.options || round.cards || round.parts
-    const sequence = Array.isArray(round.correct)
+    if (!round) return null
+    const options = optionOrder[step]
+    // Assembly rounds also carry an array, but a one-part answer is not a pattern to remember.
+    const sequence = Array.isArray(round.correct) && round.correct.length > 1
+    // A memory task has to hide the pattern before the child answers, otherwise it is only copying.
+    const studying = game.type === 'memory' && memorised !== step
     const choose = choice => {
       const next = commit({ type: 'choose', choice })
       finishIfComplete(next)
     }
-    const prompt = round.prompt
-    const instruction = game.type === 'memory' ? 'Nhớ mẫu rồi chạm lại đúng thứ tự' : game.type === 'sound' ? 'Nghe gợi ý và ghép âm thanh với hình ảnh' : game.type === 'route' ? 'Đọc tín hiệu cảm biến rồi chọn hướng an toàn' : 'Lắp từng bộ phận đúng vai trò của robot'
-    return <GameShell game={game} ai={ai} progress={`${step + 1}/${game.rounds.length}`} instruction={instruction} feedback={feedback}><div className={`new-game-board new-game-${game.type}`}><h3>{prompt}</h3>{sequence && <p className="sequence-preview">Mẫu cần nhớ: {round.correct.join('  ')}</p>}<div className="new-game-options">{options.map((option,index)=><button id={`${game.type}-choice-${index}`} key={`${option}-${index}`} onClick={()=>choose(option)}>{option}</button>)}</div>{sequence && state.selected.length>0 && <p className="selected-sequence">Em đã chọn: {state.selected.join('  ')}</p>}</div></GameShell>
+    const instruction = game.type === 'memory' ? 'Nhớ mẫu rồi chạm lại đúng thứ tự' : game.type === 'sound' ? 'Đọc mô tả âm thanh rồi chọn nguồn phát ra' : game.type === 'route' ? 'Đọc tín hiệu cảm biến rồi chọn hướng an toàn' : 'Lắp từng bộ phận đúng vai trò của robot'
+    return <GameShell game={game} ai={ai} progress={`${step + 1}/${game.rounds.length}`} instruction={instruction} feedback={studying ? '' : feedback}><div className={`new-game-board new-game-${game.type}`}><h3>{round.prompt}</h3>{studying ? <><p className="sequence-preview">Mẫu cần nhớ: {round.correct.join('  ')}</p><button id="memory-ready" className="primary" onClick={()=>setMemorised(step)}>Em đã nhớ rồi <ArrowRight size={16}/></button></> : <><div className="new-game-options">{options.map((option,index)=><button id={`${game.type}-choice-${index}`} key={`${option}-${index}`} onClick={()=>choose(option)}>{option}</button>)}</div>{sequence && <><p className="selected-sequence">Em đã chọn: {state.selected.length ? state.selected.join('  ') : '…'}</p><button id="memory-peek" className="secondary" onClick={()=>setMemorised(-1)}>Xem lại mẫu</button></>}</>}</div></GameShell>
   }
   return null
 }
@@ -672,17 +741,18 @@ function MechanicGame({ game, initialState, onStateChange, onFinish, onMistake }
 function getMechanicAI(game, step, selected, counts, ready) {
   if (game.type === 'sorting') {
     const item = game.items[step]
-    const predictedGroup = step === 3 ? 0 : item.group
+    // Items flagged aiWrong get a deliberately wrong guess so children practise checking the machine.
+    const predictedGroup = item.aiWrong ? (item.group + 1) % game.groups.length : item.group
     return { label: 'MÔ PHỎNG PHÂN LOẠI', prediction: `Dự đoán đặt sẵn: ${game.groups[predictedGroup]}`, note: 'Trò chơi dùng quy tắc cố định để tạo tình huống đúng/sai; không có mô hình đang được huấn luyện.' }
   }
   if (game.type === 'sequence' || game.type === 'pipeline') {
     return { label: game.type === 'pipeline' ? 'MÔ PHỎNG KIẾN TRÚC PIPELINE' : 'MÔ PHỎNG QUY TRÌNH HỌC MÁY', prediction: ready ? 'Đã xếp đúng thứ tự các bước' : selected.length ? `Đã xếp ${selected.length}/${(game.sequenceItems || game.stages).length} bước` : 'Chưa có bước nào', note: 'Hoạt động kiểm tra thứ tự quy trình; không huấn luyện hoặc chạy mô hình thật.' }
   }
-  if (game.type === 'matching') return { label: 'TRỢ LÝ HỌC TẬP AI', prediction: `AI trả lời về “${game.pairs[step][0]}”`, confidence: [63, 72, 67][step], note: 'Không tin ngay: hãy chọn nguồn phù hợp để xác minh.' }
+  if (game.type === 'matching') return { label: 'TRỢ LÝ HỌC TẬP AI', prediction: `AI trả lời về “${game.pairs[step][0]}”`, confidence: [63, 72, 67, 58, 74, 61][step % 6], note: 'Không tin ngay: hãy chọn nguồn phù hợp để xác minh.' }
   if (game.type === 'debug') return { label: 'CẢNH BÁO MÔ PHỎNG', prediction: 'Lộ trình không tới đích', note: 'Cảnh báo đã được đặt sẵn; em vẫn phải kiểm tra để tìm chính xác block sai.' }
   if (game.type === 'shield') {
     const item = game.items[step]
-    const predictsPrivate = step === 3 ? true : item.private
+    const predictsPrivate = item.aiWrong ? !item.private : item.private
     return { label: 'BỘ LỌC RIÊNG TƯ MÔ PHỎNG', prediction: predictsPrivate ? 'Cảnh báo: có thể là dữ liệu riêng tư' : 'Dự đoán: có thể chia sẻ', note: 'Cảnh báo dùng luật đặt sẵn và có thể sai. Quyết định cuối cùng thuộc về em và người lớn.' }
   }
   if (game.type === 'condition') return { label: 'TRỢ LÝ DỰA TRÊN LUẬT NẾU–THÌ', prediction: `Nhận thấy dữ liệu: ${game.rules[step].value}`, note: 'Đây là luật do người viết, không phải mô hình học từ dữ liệu.' }
@@ -720,6 +790,7 @@ function explainMechanicFeedback(game, feedback) {
 
 function LessonModal({ lesson, done, onComplete, close, openGame }) {
   const settings = useLearningSettings()
+  const [fullscreen, setFullscreen] = useState(false)
   const content = getLessonContent(lesson)
   const linkedGame = interactiveGames[content.grade]?.find(item=>item.id===content.gameId)
   const [answer, setAnswer] = useState(null)
@@ -729,7 +800,11 @@ function LessonModal({ lesson, done, onComplete, close, openGame }) {
   const backdropRef = useRef(null)
   const speech = useVietnameseSpeech(getLessonAudioPath(content.grade, content.lessonNumber, slide),settings.audio)
   const correct = answer === content.quiz.correct
-  const finish = () => { onComplete({kind:'lesson-quiz',lessonNumber:content.lessonNumber,quizAnswer:answer,quizCorrect:correct,partsViewed:unlocked+1}); setFinished(true) }
+  const finish = () => {
+    playVictorySound(settings.audio)
+    onComplete({kind:'lesson-quiz',lessonNumber:content.lessonNumber,quizAnswer:answer,quizCorrect:correct,partsViewed:unlocked+1})
+    setFinished(true)
+  }
   const slideMeta = [
     { label: '1 · Học', icon: BookOpen },
     { label: '2 · Xem', icon: Presentation },
@@ -737,10 +812,31 @@ function LessonModal({ lesson, done, onComplete, close, openGame }) {
     { label: '4 · Thử sức', icon: Check }
   ]
   const scrollToPageTop = () => window.requestAnimationFrame(() => backdropRef.current?.scrollTo({ top: 0, behavior: 'smooth' }))
-  const changeSlide = value => { speech.stop(); setSlide(value); scrollToPageTop() }
-  const next = () => { const value = Math.min(3, slide + 1); speech.stop(); setUnlocked(Math.max(unlocked, value)); setSlide(value); scrollToPageTop() }
+  const changeSlide = value => {
+    playPopSound(settings.audio)
+    speech.stop()
+    setSlide(value)
+    scrollToPageTop()
+  }
+  const next = () => {
+    const value = Math.min(3, slide + 1)
+    playPopSound(settings.audio)
+    speech.stop()
+    setUnlocked(Math.max(unlocked, value))
+    setSlide(value)
+    scrollToPageTop()
+  }
   const previous = () => changeSlide(Math.max(0, slide - 1))
   const closeLesson = () => { speech.stop(); close() }
+  const handleSelectAnswer = i => {
+    setAnswer(i)
+    playPopSound(settings.audio)
+    if (i === content.quiz.correct) {
+      playCorrectSound(settings.audio)
+    } else {
+      playWrongSound(settings.audio)
+    }
+  }
   const toggleSpeech = () => {
     if (speech.status === 'speaking') speech.pause()
     else if (speech.status === 'paused') speech.resume()
@@ -758,21 +854,25 @@ function LessonModal({ lesson, done, onComplete, close, openGame }) {
   }, [slide, unlocked])
 
   return <div ref={backdropRef} className="modal-backdrop lesson-backdrop" role="presentation" onMouseDown={e => e.target === e.currentTarget && closeLesson()}>
-    <article className="lesson-modal" role="dialog" aria-modal="true" aria-labelledby="lesson-title" style={{ '--lesson-color': content.color }}>
+    <article className={fullscreen ? "lesson-modal is-fullscreen" : "lesson-modal"} role="dialog" aria-modal="true" aria-labelledby="lesson-title" style={{ '--lesson-color': content.color }}>
+      {finished && <CelebrationBurst/>}
       <header className="lesson-modal-head">
         <button id="close-lesson" className="lesson-back" onClick={closeLesson}><ArrowLeft size={18}/> Về danh sách</button>
         <span className="lesson-position">Lớp {content.grade} · Tiết {content.lessonNumber}/12</span>
-        <span className="lesson-duration"><Clock3 size={15}/>{content.duration}</span>
+        <div className="modal-head-actions">
+          <span className="lesson-duration"><Clock3 size={15}/>{content.duration}</span>
+          <button type="button" className="modal-fullscreen-btn" aria-label={fullscreen ? "Thu nhỏ" : "Toàn màn hình"} onClick={()=>setFullscreen(!fullscreen)}>{fullscreen ? <Minimize2 size={16}/> : <Maximize2 size={16}/>}</button>
+        </div>
       </header>
       <div className="lesson-title-block"><span className="lesson-strand-icon">{content.icon}</span><div><small>CHẶNG {content.stage} · {content.code} · {content.name}</small><h2 id="lesson-title">{content.title}</h2><p><b>Mục tiêu:</b> {content.goal}</p></div></div>
       <div className="listen-bar"><div><Volume2/><span><b>Nghe Bo-Bo đọc phần này</b><small>{settings.audio?(speech.supported ? 'Giọng Trúc Ly · VieNeu · tươi sáng · tốc độ 1,05' : 'Thiết bị chưa hỗ trợ phát audio'):'Giáo viên đã tắt audio'}</small></span></div><div className="listen-actions"><button id="lesson-listen" disabled={!settings.audio || !speech.supported || speech.status === 'loading'} className={speech.status === 'speaking' ? 'listening' : ''} onClick={toggleSpeech}>{speech.status === 'loading' ? <><Volume2/> Đang tải…</> : speech.status === 'speaking' ? <><Pause/> Tạm dừng</> : speech.status === 'paused' ? <><Play/> Tiếp tục nghe</> : <><Volume2/> Bo-Bo đọc bài</>}</button>{speech.status !== 'idle' && <button id="lesson-replay" aria-label="Đọc lại từ đầu" onClick={() => speech.speak()}><RotateCcw/></button>}</div></div>
       {speech.status === 'error' && <p className="speech-error">Chưa tải được audio bài học. Em hãy kiểm tra kết nối rồi thử lại.</p>}
       <nav className="slide-nav" aria-label="Các phần của bài học">{slideMeta.map(({ label, icon: Icon }, i) => <button id={`lesson-slide-${i}`} key={label} className={slide === i ? 'active' : ''} disabled={i > unlocked} onClick={() => changeSlide(i)}><span>{i < unlocked || finished ? <Check size={15}/> : <Icon size={15}/>}</span>{label}</button>)}</nav>
       <div className="lesson-slide" key={slide}>
-        {slide === 0 && <section className="theory-slide"><div className="theory-action-callout"><div className="callout-lead"><Zap size={18}/><span><b>Học qua trải nghiệm thực hành:</b> Quan sát luồng hoạt động trực quan hoặc vào trạm tương tác ngay!</span></div><div className="callout-actions"><button id="quick-visual-jump" type="button" className="callout-quick-btn" onClick={next}><Presentation size={15}/> Xem slide trực quan <ArrowRight size={15}/></button>{openGame && linkedGame && <button id="quick-lab-jump" type="button" className="callout-lab-btn" onClick={() => { closeLesson(); openGame({ ...linkedGame, grade: content.grade, color: content.color, extended:content.grade===1 }) }}><Sparkles size={15}/> Mở trạm thực hành {linkedGame.title} <ArrowRight size={15}/></button>}</div></div><div className="lesson-section-title"><BookOpen/><div><small>PHẦN 1 · LÝ THUYẾT TINH GỌN</small><h3>Khám phá kiến thức mới</h3></div></div><div className="vocabulary-strip" aria-label="Từ khóa của bài">{content.vocabulary.map(item => <article key={item.term}><b>{item.term}</b><span>{item.meaning}</span></article>)}</div><div className="theory-list">{content.theoryPoints.map((point, i) => <article key={point}><span>{i + 1}</span><p>{point}</p></article>)}</div><div className="theory-support"><article className="example-card"><Sparkles/><div><b>Tình huống thực tế</b><p>{content.example}</p></div></article><article className="think-card"><Eye/><div><b>Em thử nghĩ</b><p>{content.thinkQuestion}</p></div></article></div><aside className="remember-box"><Lightbulb/><p><b>Ghi nhớ:</b> {content.remember}</p></aside></section>}
+        {slide === 0 && <section className="theory-slide"><div className="theory-action-callout"><div className="callout-lead"><Zap size={18}/><span><b>Học qua trải nghiệm thực hành:</b> Quan sát luồng hoạt động trực quan hoặc vào trạm tương tác ngay!</span></div><div className="callout-actions"><button id="quick-visual-jump" type="button" className="callout-quick-btn" onClick={next}><Presentation size={15}/> Xem slide trực quan <ArrowRight size={15}/></button>{openGame && linkedGame && <button id="quick-lab-jump" type="button" className="callout-lab-btn" onClick={() => { closeLesson(); openGame({ ...linkedGame, grade: content.grade, color: content.color, extended:content.grade===1 }) }}><Sparkles size={15}/> Mở trạm thực hành {linkedGame.title} <ArrowRight size={15}/></button>}</div></div><div className="lesson-section-title"><BookOpen/><div><small>PHẦN 1 · LÝ THUYẾT TINH GỌN</small><h3>Khám phá kiến thức mới</h3></div></div><div className="theory-list">{content.theoryPoints.map((point, i) => <article key={point}><span>{i + 1}</span><p>{highlightPrimaryKeywords(point)}</p></article>)}</div><div className="theory-support"><article className="example-card"><Sparkles/><div><b>Tình huống thực tế</b><p>{highlightPrimaryKeywords(content.example)}</p></div></article><article className="think-card"><Eye/><div><b>Em thử nghĩ</b><p>{highlightPrimaryKeywords(content.thinkQuestion)}</p></div></article></div><aside className="remember-box"><Lightbulb/><p><b>Ghi nhớ:</b> {content.remember}</p></aside></section>}
         {slide === 1 && <section className="visual-slide"><div className="lesson-section-title"><Presentation/><div><small>PHẦN 2 · SLIDE TRỰC QUAN</small><h3>Từ ý tưởng đến hành động</h3></div></div><div className="slide-canvas"><div className="slide-bobo"><Bot/><span>Bo-Bo</span></div>{content.steps.map((step, i) => <React.Fragment key={step}><article><span>{i + 1}</span><p>{step}</p></article>{i < 2 && <ArrowRight className="flow-arrow"/>}</React.Fragment>)}</div><p className="slide-caption">Quan sát dòng chảy từ trái sang phải và kể lại bằng lời của em.</p></section>}
         {slide === 2 && <section className="illustration-slide"><div className="lesson-section-title"><Images/><div><small>PHẦN 3 · HÌNH ẢNH MINH HỌA</small><h3>Quan sát thật kỹ nhé!</h3></div></div><figure><img src={content.illustration} alt={`Minh họa chặng ${content.stage} môn AI lớp ${content.grade}: ${content.name}`}/><figcaption><Eye size={19}/><div><b>Câu hỏi quan sát</b><p>{content.observe}</p></div></figcaption></figure></section>}
-        {slide === 3 && <section className="lesson-check"><small>PHẦN 4 · TRẮC NGHIỆM</small><h3>{content.quiz.question}</h3><div className="answer-list">{content.quiz.options.map((option, i) => <button id={`lesson-answer-${i}`} className={answer === i ? (correct ? 'answer selected correct' : 'answer selected wrong') : 'answer'} key={option} onClick={() => setAnswer(i)}><span>{String.fromCharCode(65 + i)}</span>{option}{answer === i && correct && <Check size={18}/>}</button>)}</div>{answer !== null && <p className={correct ? 'quiz-feedback correct' : 'quiz-feedback'}>{correct ? `Chính xác! ${content.quiz.explanation}` : 'Chưa đúng rồi. Em xem lại các slide rồi thử lần nữa nhé!'}</p>}</section>}
+        {slide === 3 && <section className="lesson-check"><small>PHẦN 4 · TRẮC NGHIỆM</small><h3>{content.quiz.question}</h3><div className="answer-list">{content.quiz.options.map((option, i) => <button id={`lesson-answer-${i}`} className={answer === i ? (correct ? 'answer selected correct' : 'answer selected wrong') : 'answer'} key={option} onClick={() => handleSelectAnswer(i)}><span>{String.fromCharCode(65 + i)}</span>{option}{answer === i && correct && <Check size={18}/>}</button>)}</div>{answer !== null && <p className={correct ? 'quiz-feedback correct' : 'quiz-feedback'}>{correct ? `Chính xác! ${content.quiz.explanation}` : 'Chưa đúng rồi. Em xem lại các slide rồi thử lần nữa nhé!'}</p>}</section>}
       </div>
       <div className="lesson-modal-footer"><button id="previous-lesson-slide" className="lesson-page-button lesson-page-back" disabled={slide===0||finished} onClick={previous}><ArrowLeft size={18}/> Trang trước</button><span className="lesson-page-status">{finished ? <><Check/> Hoàn thành</> : <>Trang <b>{slide + 1}</b>/4</>}</span>{slide < 3 ? <button id="next-lesson-slide" className="primary lesson-page-button" onClick={next}>Trang tiếp <ArrowRight size={18}/></button> : <button id="complete-lesson" className="primary lesson-page-button" disabled={!correct && !finished} onClick={finished ? closeLesson : finish}>{finished ? 'Về danh sách' : 'Hoàn thành'} <ArrowRight size={18}/></button>}</div>
     </article>

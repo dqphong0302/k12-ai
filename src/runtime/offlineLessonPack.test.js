@@ -2,6 +2,24 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { activityAudioResources, buildOfflineLessonPack, offlinePackFilename } from './offlineLessonPack.js'
 import { activityRegistry } from '../content/activities.js'
+import { primaryPilotPlans } from '../content/primaryPilotPlans.js'
+
+test('năm bài pilot xuất đủ giáo án cụ thể, thời gian, đáp án và phương án giấy',()=>{
+  assert.equal(Object.keys(primaryPilotPlans).length,5)
+  for(const [id,plan] of Object.entries(primaryPilotPlans)){
+    const activity=activityRegistry.find(item=>item.id===id)
+    assert.equal(activity.teacher.durationMin,35)
+    const html=buildOfflineLessonPack(activity)
+    for(const marker of ['0–9 phút','9–21 phút','21–28 phút','28–33 phút','33–35 phút','Đáp án/gợi ý'])assert.ok(html.includes(marker),`${id}: ${marker}`)
+    const studentSection=html.split('aria-label="Phiếu hoạt động đi kèm">')[1]
+    assert.ok(studentSection,`${id}: phiếu đi kèm`)
+    assert.ok(!studentSection.includes(plan.answer),`${id}: không lộ đáp án trên phiếu`)
+    assert.ok(html.includes(plan.answer),`${id}: giữ đáp án trong tài liệu giáo viên`)
+    assert.ok(activity.teacher.setup.some(line=>line.includes(plan.materials)),id)
+    assert.ok(activity.teacher.offlineAlternative.includes(plan.offline),id)
+    assert.ok(activity.teacher.offlineAlternative.includes(activity.evidenceRef),id)
+  }
+})
 
 test('gói offline bài học chứa nội dung, hướng dẫn, dữ liệu, phiếu và trạng thái audio',()=>{
   const activity=activityRegistry.find(item=>item.id==='middle-6-lesson-1')

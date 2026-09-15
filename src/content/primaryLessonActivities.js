@@ -1,5 +1,6 @@
 import { defineActivity } from './activitySchema.js'
 import { getLessonContent, grades, strands } from '../lessonContent.js'
+import { pilotTeacherSupport } from './primaryPilotPlans.js'
 
 export const lessonPrerequisites=(grade,lessonNumber)=>{
   if(lessonNumber>1)return [`Đã hoàn thành hoặc ôn lại khái niệm của tiết ${lessonNumber-1} cùng khối.`]
@@ -90,8 +91,37 @@ export const lessonHints=(grade,title,objective,evidenceRef)=>{
 }
 
 export const primaryLessons = grades.flatMap(grade => grade.titles.map((title, index) => {
-  const strand = strands[Math.floor(index / 3)]
-  const content = getLessonContent({ grade: grade.id, index, title, strand })
+  const content = getLessonContent({ grade: grade.id, index, title })
+  const strand = strands.find(item => item.code === content.code)
+  const standardRefs = content.standards.split(' · ')
+  const strandRefs = [...new Set(standardRefs.map(ref => ref.split('.')[1][0]))]
+    .map(short => strands.find(item => item.short === short).code)
+  const coreStandardRefs = standardRefs.filter(ref => !ref.includes('.MR'))
+  const extensionStandardRefs = standardRefs.filter(ref => ref.includes('.MR'))
+  const teacher = {
+    durationMin: grade.id<=2?35:40,
+    ...lessonTeacherSupport(grade.id,title,content.goal,content.thinkQuestion),
+    ...pilotTeacherSupport(`primary-${grade.id}-${index+1}`,title,content.thinkQuestion)
+  }
+  teacher.setup = [
+    `Mã cốt lõi: ${coreStandardRefs.join(' · ')||'Không có mã cốt lõi trong bài này'}.`,
+    `Mã mở rộng: ${extensionStandardRefs.join(' · ')||'Không có'}. Phân loại theo bản nguồn đang lưu; không coi hoàn thành trò chơi là đạt mọi yêu cầu.`,
+    ...teacher.setup
+  ]
+  if(grade.id===1&&index===2)teacher.setup.push('Lưu ý ví dụ robot hút bụi: tránh vật cản có thể chỉ dùng cảm biến và luật cố định, chưa đủ chứng minh có AI. Dùng ví dụ loa xử lý lời nói hoặc ứng dụng phân loại ảnh để chỉ rõ chức năng AI; không yêu cầu trẻ đoán công nghệ chỉ qua hình dáng thiết bị.')
+  if(grade.id===1&&index===5){
+    const task='Minh chứng 1.C1.4: cô đóng vai máy theo bảng kịch bản in sẵn: nghe “chào” thì đáp “chào bạn”, nghe “kể chuyện” thì đọc một câu chuyện mẫu, lệnh ngoài bảng thì đáp “chưa hiểu”. Mỗi em chọn một lệnh trong bảng và một lệnh mới, dự đoán phản hồi rồi nói vì sao máy không hiểu mọi câu. Đây là đóng vai mô phỏng cách phản hồi, không phải cô là mô hình AI.'
+    teacher.setup.push(`Thay phần làm mẫu và câu hỏi tổng kết trong tiết, không cộng thêm thời gian: ${task}`)
+    teacher.offlineAlternative+=` ${task}`
+  }
+  if(grade.id===3&&index===2){
+    const task='Minh chứng 3.A1.5 trước khi dùng AI: đưa tình huống muốn hỏi lịch thư viện hoặc gửi ảnh bạn để nhờ AI nhận xét. Mỗi em tự đặt và trả lời hai câu hỏi: “Có cần dùng AI không?” và “Nếu sai hoặc lộ ảnh thì ai bị ảnh hưởng?”. Em chọn dùng nguồn trực tiếp, hỏi người lớn hoặc không gửi ảnh, nêu lý do. Cô ghi câu hỏi do em đặt, không chỉ chấm câu trả lời trắc nghiệm.'
+    teacher.setup.push(`Dùng 4 phút khởi động và phần hỏi cá nhân đã có trong kịch bản 35 phút, không cộng thêm hoạt động: ${task}`)
+    teacher.offlineAlternative+=` ${task}`
+  }
+  if(grade.id===4&&index===4){
+    teacher.setup.push('Giới hạn 4.C5.MR2: đổi một nhãn trong cùng bộ lá chưa chứng minh lặp đủ quy trình với nhóm dữ liệu tự chọn khác. Chỉ đánh giá yêu cầu này khi học sinh thực sự đặt nhóm, đưa dữ liệu khác, huấn luyện và thử mẫu mới trên công cụ đã được trường duyệt. Nếu lab hiện tại không hỗ trợ dữ liệu khác, ghi chưa đánh giá MR2 và bố trí buổi mở rộng phù hợp; không thay bằng kết quả mẫu hoặc điểm game.')
+  }
   return defineActivity({
     id: `primary-${grade.id}-${index + 1}`,
     type: 'lesson',
@@ -101,6 +131,10 @@ export const primaryLessons = grades.flatMap(grade => grade.titles.map((title, i
     ministry: content.standards,
     aiApp: 'Bài học tương tác Bo-Bo',
     standardsRef:content.standards,
+    standardRefs,
+    strandRefs,
+    coreStandardRefs,
+    extensionStandardRefs,
     evidenceRef:content.thinkQuestion,
     variantRef:`primary-${grade.id}-${index + 1}`,
     objectives: [content.goal],
@@ -111,7 +145,7 @@ export const primaryLessons = grades.flatMap(grade => grade.titles.map((title, i
     content,
     assessment:lessonAssessment(grade.id,content.goal,content.thinkQuestion),
     hints:lessonHints(grade.id,title,content.goal,content.thinkQuestion),
-    teacher: {durationMin:grade.id<=2?35:40,...lessonTeacherSupport(grade.id,title,content.goal,content.thinkQuestion)},
+    teacher,
     accessibility: {
       transcript: content.theoryPoints.join(' '),
       reducedMotion: true

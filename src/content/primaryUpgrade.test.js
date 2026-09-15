@@ -140,3 +140,45 @@ test('trò phân loại và quy trình mới hoàn thành được',()=>{
     assert.ok(engine.isComplete(state,game),game.id)
   }
 })
+
+test('đáp án tiểu học không đoán được từ vị trí nút hay nhịp xen kẽ',()=>{
+  const games=Object.values(primaryActivities).flat()
+  for(const game of games.filter(g=>['memory','sound','route','assembly'].includes(g.type))){
+    // The engine matches by value, so main.jsx shuffles the buttons; the data must still
+    // not hand the answer to a child who only ever taps the first option.
+    for(const round of game.rounds){
+      const options=round.options||round.cards||round.parts
+      assert.ok(options.length>=3||game.type==='memory',`${game.id}: cần ít nhất 3 lựa chọn`)
+      assert.ok(options.includes(Array.isArray(round.correct)?round.correct[0]:round.correct),`${game.id}: đáp án phải nằm trong lựa chọn`)
+      for(const value of Array.isArray(round.correct)?round.correct:[round.correct])assert.ok(options.includes(value),`${game.id}: ${value} không có trong lựa chọn`)
+    }
+    if(game.type==='memory')for(const round of game.rounds)for(const value of round.correct)assert.ok(!round.prompt.includes(value),`${game.id}: câu dẫn không được lộ mẫu cần nhớ`)
+  }
+  for(const game of games.filter(g=>['sorting','shield'].includes(g.type))){
+    const sequence=game.items.map(item=>game.type==='sorting'?item.group:Number(item.private))
+    assert.ok(sequence.some((value,index)=>index>0&&value===sequence[index-1]),`${game.id}: đáp án không được xen kẽ đều`)
+    assert.equal(game.items.filter(item=>item.aiWrong).length,1,`${game.id}: cần đúng một thẻ để AI mô phỏng đoán sai`)
+  }
+})
+
+test('chỉ trò nhớ mẫu mới có chuỗi nhiều bước cần che',()=>{
+  for(const game of Object.values(primaryActivities).flat().filter(g=>['sound','route','assembly'].includes(g.type)))
+    for(const round of game.rounds)
+      assert.ok(!Array.isArray(round.correct)||round.correct.length===1,`${game.id}: chỉ trò memory mới dùng chuỗi nhiều bước`)
+})
+
+test('mỗi bước quy trình đều có biểu tượng riêng',()=>{
+  for(const game of Object.values(primaryActivities).flat().filter(g=>['sequence','pipeline'].includes(g.type))){
+    const steps=game.sequenceItems||game.stages
+    assert.equal(game.icons?.length,steps.length,`${game.id}: cần đủ biểu tượng cho từng bước`)
+    assert.equal(new Set(game.icons).size,steps.length,`${game.id}: biểu tượng không được trùng`)
+  }
+})
+
+test('mỗi lượt chơi không có hai lựa chọn giống hệt nhau',()=>{
+  for(const game of Object.values(primaryActivities).flat().filter(g=>['memory','sound','route','assembly'].includes(g.type)))
+    for(const round of game.rounds){
+      const options=round.options||round.cards||round.parts
+      assert.equal(new Set(options).size,options.length,`${game.id}: lựa chọn trùng khiến em không phân biệt được nút`)
+    }
+})

@@ -30,40 +30,40 @@ const rawActivities = {
     { id: 'emotion-detective', type: 'sorting', icon: '😊', title: 'Thám tử cảm xúc', description: 'Phân loại 12 tình huống tinh ý hơn để nhận ra cảm xúc thật của con người và biểu cảm do máy được lập trình.', image: '/images/game-grade-1-emotion-detective.png', ministry: '1.A1.1–4 · 1.A2.1', aiApp: 'Mô phỏng phân loại tình huống', groups: ['Cảm xúc thật của người', 'Biểu cảm máy được lập trình'], items: [
       {icon:'👧',label:'Lan vui vì được bạn giúp đỡ',group:0},
       {icon:'🤖',label:'Bo-Bo hiện mặt cười sau câu trả lời đúng',group:1},
-      {icon:'😢',label:'Minh buồn khi cây nhỏ bị gãy',group:0},
       {icon:'🔊',label:'Trợ lý ảo nói “Tôi rất vui được giúp bạn”',group:1},
+      {icon:'😢',label:'Minh buồn khi cây nhỏ bị gãy',group:0,aiWrong:true},
       {icon:'😮',label:'An ngạc nhiên khi thấy cầu vồng',group:0},
-      {icon:'🖥️',label:'Màn hình robot hiện khuôn mặt buồn khi pin yếu',group:1},
       {icon:'😨',label:'Bình sợ khi nghe tiếng sấm lớn',group:0},
-      {icon:'🎮',label:'Nhân vật máy nhảy vui theo lệnh của trò chơi',group:1},
+      {icon:'🖥️',label:'Màn hình robot hiện khuôn mặt buồn khi pin yếu',group:1},
       {icon:'🤗',label:'Mai thấy nhẹ nhõm khi được cô giáo lắng nghe',group:0},
+      {icon:'🎮',label:'Nhân vật máy nhảy vui theo lệnh của trò chơi',group:1},
       {icon:'🤖',label:'Robot rung đèn tim khi pin vừa sạc đầy',group:1},
-      {icon:'😔',label:'Nam nhớ bạn khi bạn nghỉ học',group:0},
-      {icon:'🖥️',label:'Màn hình đổi sang mặt lo lắng khi gặp lỗi',group:1}
+      {icon:'🖥️',label:'Màn hình đổi sang mặt lo lắng khi gặp lỗi',group:1},
+      {icon:'😔',label:'Nam nhớ bạn khi bạn nghỉ học',group:0}
     ] },
     { id: 'little-data-knight', type: 'shield', icon: '🛡️', title: 'Hiệp sĩ thông tin nhí', description: 'Vượt 14 tình huống có cả thông tin dễ nhầm để quyết định điều gì cần bảo vệ và điều gì có thể chia sẻ.', image: '/images/game-grade-1-information-shield.png', ministry: '1.B1.1 · 1.B3.1–2', aiApp: 'Mô phỏng bộ lọc dữ liệu an toàn', items: [
       {text:'Mật khẩu tài khoản học tập',private:true},
       {text:'Màu em yêu thích',private:false},
       {text:'Địa chỉ nhà của em',private:true},
-      {text:'Tên cuốn sách em thích',private:false},
-      {text:'Số điện thoại của bố mẹ',private:true},
+      {text:'Tên cuốn sách em thích',private:false,aiWrong:true},
       {text:'Môn học em yêu thích',private:false},
+      {text:'Số điện thoại của bố mẹ',private:true},
       {text:'Ảnh thẻ có họ tên và ngày sinh',private:true},
       {text:'Con vật em yêu thích',private:false},
-      {text:'Mã đăng nhập lớp học',private:true},
       {text:'Trò chơi em thích chơi cùng bạn',private:false},
+      {text:'Mã đăng nhập lớp học',private:true},
       {text:'Biệt danh trong lớp',private:false},
       {text:'Tên trường và lớp đang học',private:true},
-      {text:'Bức tranh em tự vẽ',private:false},
-      {text:'Ảnh chụp trước cửa nhà',private:true}
+      {text:'Ảnh chụp trước cửa nhà',private:true},
+      {text:'Bức tranh em tự vẽ',private:false}
     ] },
     { id: 'pattern-garden', type: 'memory', icon: '🌱', title: 'Khu vườn mẫu thông minh', description: 'Nhìn chuỗi mẫu ngắn rồi chạm lại đúng thứ tự để dạy Bo-Bo nhận ra quy luật.', ministry: '1.A2.1 · 1.C2.1', aiApp: 'Mô phỏng nhận ra mẫu', image: '/images/game-grade-1-pattern-garden.png', rounds: [
-      {prompt:'Nhớ chuỗi màu: đỏ → vàng', cards:['🔴','🟡','🔵','🟢'], correct:['🔴','🟡'], wrong:'Chưa đúng: hãy nhìn lại màu và thứ tự trong mẫu.'},
-      {prompt:'Nhớ chuỗi hình: sao → tròn → sao', cards:['⭐','⚪','🔺','🟩'], correct:['⭐','⚪','⭐'], wrong:'Chưa đúng: mẫu lặp lại hình ngôi sao sau hình tròn.'},
-      {prompt:'Nhớ chuỗi: lá → hoa → lá', cards:['🌿','🌸','🍎','🌿'], correct:['🌿','🌸','🌿'], wrong:'Chưa đúng: hãy tìm mẫu lặp lá – hoa – lá.'},
-      {prompt:'Nhớ chuỗi âm thanh: trống → chuông', cards:['🥁','🔔','🎵','👏'], correct:['🥁','🔔'], wrong:'Chưa đúng: trống phát trước, chuông phát sau.'}
+      {prompt:'Chuỗi màu gồm 2 thẻ. Nhớ rồi chạm lại đúng thứ tự.', cards:['🔴','🟡','🔵','🟢'], correct:['🔴','🟡'], wrong:'Chưa đúng: hãy nhìn lại màu và thứ tự trong mẫu.'},
+      {prompt:'Chuỗi hình gồm 3 thẻ, có một hình lặp lại. Nhớ rồi chạm lại.', cards:['⭐','⚪','🔺','🟩'], correct:['⭐','⚪','⭐'], wrong:'Chưa đúng: mẫu lặp lại hình ngôi sao sau hình tròn.'},
+      {prompt:'Chuỗi vườn gồm 3 thẻ. Nhớ rồi chạm lại đúng thứ tự.', cards:['🌿','🌸','🍎','🌼'], correct:['🌿','🌸','🌿'], wrong:'Chưa đúng: hãy tìm mẫu lặp lá – hoa – lá.'},
+      {prompt:'Chuỗi nhạc cụ gồm 2 thẻ. Nhớ rồi chạm lại đúng thứ tự.', cards:['🥁','🔔','🎵','👏'], correct:['🥁','🔔'], wrong:'Chưa đúng: trống phát trước, chuông phát sau.'}
     ] },
-    { id: 'sound-secret', type: 'sound', icon: '🎧', title: 'Âm thanh bí mật', description: 'Nghe gợi ý của Bo-Bo và ghép âm thanh với hình ảnh phù hợp qua 4 lượt.', ministry: '1.C1.2–3 · 1.C2.1', aiApp: 'Mô phỏng nhận diện âm thanh', image: '/images/game-grade-1-sound-secret.png', rounds: [
+    { id: 'sound-secret', type: 'sound', icon: '🎧', title: 'Âm thanh bí mật', description: 'Đọc mô tả âm thanh của Bo-Bo rồi chọn đúng nguồn phát ra âm thanh đó qua 4 lượt.', ministry: '1.C1.2–3 · 1.C2.1', aiApp: 'Mô phỏng nhận diện âm thanh', image: '/images/game-grade-1-sound-secret.png', rounds: [
       {prompt:'Âm thanh leng keng là gì?', options:['🔔 Chuông','🥁 Trống','🌧️ Mưa'], correct:'🔔 Chuông', wrong:'Chưa đúng: âm thanh leng keng thường do chuông phát ra.'},
       {prompt:'Âm thanh “tùng tùng” là gì?', options:['🐦 Chim hót','🥁 Trống','🚗 Còi xe'], correct:'🥁 Trống', wrong:'Chưa đúng: tiếng tùng tùng là nhịp trống.'},
       {prompt:'Âm thanh tí tách là gì?', options:['🌧️ Mưa','🔔 Chuông','👏 Vỗ tay'], correct:'🌧️ Mưa', wrong:'Chưa đúng: mưa rơi tạo tiếng tí tách.'},
@@ -83,20 +83,20 @@ const rawActivities = {
     ] }
   ],
   2: [
-    { id: 'data-garden', type: 'sorting', icon: '🧺', title: 'Phân loại vườn dữ liệu', description: 'Dùng tiêu chí, nhận ra khi thiếu thông tin rồi sửa nhãn sai và so sánh trên cùng mẫu mới.', image: '/images/game-grade-2-data-garden.png', ministry: '2.C3.1–2 · 2.D2.1–2', aiApp: 'Mô phỏng phân loại theo ví dụ gần nhất', items: [{ icon: '🍎', label: 'Táo', group: 0 }, { icon: '🚗', label: 'Ô tô', group: 1 }, { icon: '🍌', label: 'Chuối', group: 0 }, { icon: '🐱', label: 'Mèo', group: 1 }, { icon: '🍊', label: 'Cam', group: 0 }, { icon: '⚽', label: 'Bóng', group: 1 }], groups: ['Trái cây', 'Không phải trái cây'] },
+    { id: 'data-garden', type: 'sorting', icon: '🧺', title: 'Phân loại vườn dữ liệu', description: 'Dùng tiêu chí, nhận ra khi thiếu thông tin rồi sửa nhãn sai và so sánh trên cùng mẫu mới.', image: '/images/game-grade-2-data-garden.png', ministry: '2.C3.1–2 · 2.D2.1–2', aiApp: 'Mô phỏng phân loại theo ví dụ gần nhất', items: [{ icon: '🍎', label: 'Táo', group: 0 }, { icon: '🚗', label: 'Ô tô', group: 1 }, { icon: '🐱', label: 'Mèo', group: 1 }, { icon: '🍌', label: 'Chuối', group: 0, aiWrong: true }, { icon: '🍊', label: 'Cam', group: 0 }, { icon: '⚽', label: 'Bóng', group: 1 }], groups: ['Trái cây', 'Không phải trái cây'] },
     { id: 'garden-coder', type: 'sequence', icon: '🌱', title: 'Xếp quy trình học từ ví dụ', description: 'Sắp xếp bốn bước đang bị xáo trộn để mô hình hóa cách một hệ thống học máy được tạo.', image: '/images/game-grade-2-garden-coder.png', ministry: '2.C1.1 · 2.D1.MR1 · 2.D2.MR1', aiApp: 'Mô phỏng quy trình · chưa huấn luyện mô hình', sequenceItems: ['Thu thập ví dụ', 'Đặt tên từng nhóm', 'Cho máy học', 'Thử với mẫu mới'], icons: ['📸', '🏷️', '🧠', '🧪'] },
     { id: 'trusted-source-match', type: 'matching', icon: '🔗', title: 'Cầu nối nguồn tin', description: 'Ghép 6 câu hỏi với nguồn đáng tin cậy nhất để kiểm tra câu trả lời của trợ lý AI.', image: '/images/game-grade-2-source-bridge.png', ministry: '2.A2.1 · 2.B2.1', aiApp: 'Mô phỏng kiểm chứng nguồn thông tin', pairs: [['Ngày mai trường có nghỉ không?', 'Thông báo chính thức của trường'], ['Con hổ ăn gì?', 'Sách khoa học về động vật'], ['Bài toán này giải thế nào?', 'Giáo viên hoặc sách giáo khoa'], ['Hôm nay có mưa không?', 'Bản tin dự báo thời tiết'], ['Thuốc này dùng ra sao?', 'Bác sĩ hoặc người lớn phụ trách'], ['Ảnh trên mạng có được dùng lại?', 'Thông tin giấy phép và tác giả']] },
     { id: 'robot-command-debug', type: 'debug', icon: '🐞', title: 'Săn lỗi lệnh robot', description: 'Đọc 6 block và tìm đúng lệnh làm Bo-Bo rời khỏi đường an toàn.', image: '/images/game-grade-2-debug-trail.png', ministry: '2.C4.1 · 2.D2.1', aiApp: 'Mô phỏng cảnh báo lỗi chương trình', blocks: ['Đi sang phải', 'Đi sang phải', 'Đi xuống', 'Đi sang trái', 'Đi xuống', 'Đi sang phải'], wrong: 3, explanation: 'Block “Đi sang trái” làm Bo-Bo quay khỏi lộ trình. Cần thay bằng “Đi sang phải”.' },
-    { id: 'safe-share-ranger', type: 'shield', icon: '🛡️', title: 'Kiểm lâm chia sẻ an toàn', description: 'Vượt 12 thẻ dữ liệu, tự quyết định thông tin nào cần chặn dù cảnh báo mô phỏng đôi lúc sai.', image: '/images/game-grade-2-safe-share.png', ministry: '2.B1.1–2 · 2.B3.1', aiApp: 'Mô phỏng bộ lọc dữ liệu riêng tư', items: [{text:'Mật khẩu học tập',private:true},{text:'Màu em yêu thích',private:false},{text:'Ảnh có tên trường và lớp',private:true},{text:'Tên truyện em thích',private:false},{text:'Số điện thoại người thân',private:true},{text:'Món ăn em thích',private:false},{text:'Địa chỉ nhà',private:true},{text:'Bức tranh không có thông tin cá nhân',private:false},{text:'Mã tham gia lớp học',private:true},{text:'Con vật em yêu thích',private:false},{text:'Ảnh vé có họ tên và mã số',private:true},{text:'Bài hát em thích',private:false}] },
+    { id: 'safe-share-ranger', type: 'shield', icon: '🛡️', title: 'Kiểm lâm chia sẻ an toàn', description: 'Vượt 12 thẻ dữ liệu, tự quyết định thông tin nào cần chặn dù cảnh báo mô phỏng đôi lúc sai.', image: '/images/game-grade-2-safe-share.png', ministry: '2.B1.1–2 · 2.B3.1', aiApp: 'Mô phỏng bộ lọc dữ liệu riêng tư', items: [{text:'Mật khẩu học tập',private:true},{text:'Màu em yêu thích',private:false},{text:'Ảnh có tên trường và lớp',private:true},{text:'Tên truyện em thích',private:false,aiWrong:true},{text:'Món ăn em thích',private:false},{text:'Số điện thoại người thân',private:true},{text:'Địa chỉ nhà',private:true},{text:'Bức tranh không có thông tin cá nhân',private:false},{text:'Con vật em yêu thích',private:false},{text:'Mã tham gia lớp học',private:true},{text:'Ảnh vé có họ tên và mã số',private:true},{text:'Bài hát em thích',private:false}] },
     { id: 'pattern-lanterns', type: 'memory', icon: '🏮', title: 'Đèn lồng nhớ mẫu', description: 'Nhớ và nhập lại 6 chuỗi hình dài dần, có mẫu lặp và đổi chiều.', image: '/images/game-grade-2-pattern-lanterns.png', ministry: '2.C2.1 · 2.D1.1', aiApp: 'Mô phỏng nhận diện mẫu tuần tự', rounds: [
-      {prompt:'Nhớ chuỗi: đỏ → vàng → xanh',cards:['🔴','🟡','🟢','🔵'],correct:['🔴','🟡','🟢'],wrong:'Chưa đúng: hãy nhớ cả màu và thứ tự.'},
-      {prompt:'Nhớ mẫu lặp: sao → tròn → sao',cards:['⭐','⚪','🔺','🟩'],correct:['⭐','⚪','⭐'],wrong:'Chưa đúng: ngôi sao xuất hiện ở đầu và cuối.'},
-      {prompt:'Nhớ chuỗi: lá → hoa → quả → lá',cards:['🌿','🌸','🍎','🍄'],correct:['🌿','🌸','🍎','🌿'],wrong:'Chưa đúng: chuỗi quay lại chiếc lá.'},
-      {prompt:'Nhớ nhịp: trống → chuông → trống → vỗ tay',cards:['🥁','🔔','👏','🎵'],correct:['🥁','🔔','🥁','👏'],wrong:'Chưa đúng: tiếng trống xuất hiện hai lần.'},
-      {prompt:'Nhớ chuỗi đổi chiều: lên → phải → xuống → trái',cards:['⬆️','➡️','⬇️','⬅️'],correct:['⬆️','➡️','⬇️','⬅️'],wrong:'Chưa đúng: hãy đi quanh bốn hướng theo chiều kim đồng hồ.'},
-      {prompt:'Thử thách cuối: tròn → tam giác → vuông → tam giác → tròn',cards:['⚪','🔺','🟩','⭐'],correct:['⚪','🔺','🟩','🔺','⚪'],wrong:'Chưa đúng: mẫu đi tới hình vuông rồi quay ngược lại.'}
+      {prompt:'Chuỗi đèn lồng gồm 3 màu. Nhớ rồi chạm lại đúng thứ tự.',cards:['🔴','🟡','🟢','🔵'],correct:['🔴','🟡','🟢'],wrong:'Chưa đúng: hãy nhớ cả màu và thứ tự.'},
+      {prompt:'Mẫu lặp gồm 3 thẻ. Nhớ rồi chạm lại đúng thứ tự.',cards:['⭐','⚪','🔺','🟩'],correct:['⭐','⚪','⭐'],wrong:'Chưa đúng: ngôi sao xuất hiện ở đầu và cuối.'},
+      {prompt:'Chuỗi vườn gồm 4 thẻ, kết thúc quay về thẻ đầu. Nhớ rồi chạm lại.',cards:['🌿','🌸','🍎','🍄'],correct:['🌿','🌸','🍎','🌿'],wrong:'Chưa đúng: chuỗi quay lại chiếc lá.'},
+      {prompt:'Nhịp gồm 4 thẻ, có một thẻ xuất hiện hai lần. Nhớ rồi chạm lại.',cards:['🥁','🔔','👏','🎵'],correct:['🥁','🔔','🥁','👏'],wrong:'Chưa đúng: tiếng trống xuất hiện hai lần.'},
+      {prompt:'Chuỗi hướng gồm 4 thẻ đi vòng quanh. Nhớ rồi chạm lại đúng thứ tự.',cards:['⬆️','➡️','⬇️','⬅️'],correct:['⬆️','➡️','⬇️','⬅️'],wrong:'Chưa đúng: hãy đi quanh bốn hướng theo chiều kim đồng hồ.'},
+      {prompt:'Thử thách cuối: chuỗi 5 thẻ đối xứng. Nhớ rồi chạm lại đúng thứ tự.',cards:['⚪','🔺','🟩','⭐'],correct:['⚪','🔺','🟩','🔺','⚪'],wrong:'Chưa đúng: mẫu đi tới hình vuông rồi quay ngược lại.'}
     ] },
-    { id: 'sound-lab-journey', type: 'sound', icon: '🎧', title: 'Hành trình phòng âm thanh', description: 'Giải 6 câu đố âm thanh từ môi trường và thiết bị, có các lựa chọn gần giống nhau.', image: '/images/game-grade-2-sound-lab.png', ministry: '2.C1.2–3 · 2.C2.1', aiApp: 'Mô phỏng nhận diện âm thanh', rounds: [
+    { id: 'sound-lab-journey', type: 'sound', icon: '🎧', title: 'Hành trình phòng âm thanh', description: 'Giải 6 câu đố mô tả âm thanh từ môi trường và thiết bị, có các lựa chọn gần giống nhau.', image: '/images/game-grade-2-sound-lab.png', ministry: '2.C1.2–3 · 2.C2.1', aiApp: 'Mô phỏng nhận diện âm thanh', rounds: [
       {prompt:'Âm thanh “rì rào” ngoài sân thường là gì?',options:['🍃 Gió qua lá','🌧️ Mưa lớn','🚗 Còi xe'],correct:'🍃 Gió qua lá',wrong:'Chưa đúng: gió qua nhiều chiếc lá tạo tiếng rì rào.'},
       {prompt:'Tiếng “tích tắc” đều đặn là gì?',options:['⏰ Đồng hồ','🥁 Trống','🔔 Chuông'],correct:'⏰ Đồng hồ',wrong:'Chưa đúng: đồng hồ tạo nhịp tích tắc đều.'},
       {prompt:'Âm thanh “ào ào” sau chớp sáng là gì?',options:['⛈️ Mưa giông','🍃 Gió nhẹ','🐦 Chim hót'],correct:'⛈️ Mưa giông',wrong:'Chưa đúng: mưa giông thường có âm thanh lớn sau chớp sáng.'},
@@ -118,12 +118,12 @@ const rawActivities = {
     { id: 'fact-check-code', type: 'debug', icon: '🐞', title: 'Tìm block làm đường đi sai', description: 'Theo dõi 8 lệnh qua vườn, tìm block khiến Bo-Bo rời đường an toàn và giải thích cách sửa.', image: '/images/grade-3-fact-check-code.webp', ministry: '3.C5.1 · 3.D2.3', aiApp: 'Mô phỏng cảnh báo bất thường', blocks: ['Sang phải', 'Sang phải', 'Đi lên', 'Sang phải', 'Đi xuống', 'Sang phải', 'Đi lên', 'Sang phải'], wrong: 4, explanation: 'Block “Đi xuống” làm Bo-Bo chạm luống hoa. Đổi thành “Đi lên” để tiếp tục trên đường an toàn.' }
   ],
   4: [
-    { id: 'privacy-shield', type: 'shield', icon: '🛡️', title: 'Bộ lọc AI bảo vệ dữ liệu', description: 'Phân tích 14 tình huống từ ảnh, tài khoản và ứng dụng để quyết định dữ liệu nào cần chặn hoặc xin người lớn hỗ trợ.', image: '/images/grade-4-privacy-shield.webp', ministry: '4.B2.1–2 · 4.B2.MR1', aiApp: 'Mô phỏng phát hiện dữ liệu nhạy cảm', items: [{ text: 'Mật khẩu tài khoản học tập', private: true }, { text: 'Màu em yêu thích', private: false }, { text: 'Địa chỉ nhà và vị trí trực tiếp', private: true }, { text: 'Tên cuốn sách em yêu thích', private: false }, { text: 'Số điện thoại người thân', private: true }, { text: 'Ảnh vé có họ tên và mã vuông', private: true }, { text: 'Bức tranh phong cảnh em tự vẽ', private: false }, { text: 'Mã xác nhận gửi về điện thoại', private: true }, { text: 'Môn thể thao em thích', private: false }, { text: 'Ảnh thẻ học sinh còn rõ thông tin', private: true }, { text: 'Công thức món ăn em thích', private: false }, { text: 'Tên đăng nhập kèm mật khẩu', private: true }, { text: 'Bài hát cả lớp đang tập', private: false }, { text: 'Lịch đi xa của cả gia đình', private: true }] },
+    { id: 'privacy-shield', type: 'shield', icon: '🛡️', title: 'Bộ lọc AI bảo vệ dữ liệu', description: 'Phân tích 14 tình huống từ ảnh, tài khoản và ứng dụng để quyết định dữ liệu nào cần chặn hoặc xin người lớn hỗ trợ.', image: '/images/grade-4-privacy-shield.webp', ministry: '4.B2.1–2 · 4.B2.MR1', aiApp: 'Mô phỏng phát hiện dữ liệu nhạy cảm', items: [{ text: 'Mật khẩu tài khoản học tập', private: true }, { text: 'Màu em yêu thích', private: false }, { text: 'Địa chỉ nhà và vị trí trực tiếp', private: true }, { text: 'Tên cuốn sách em yêu thích', private: false, aiWrong: true }, { text: 'Môn thể thao em thích', private: false }, { text: 'Số điện thoại người thân', private: true }, { text: 'Ảnh vé có họ tên và mã vuông', private: true }, { text: 'Bức tranh phong cảnh em tự vẽ', private: false }, { text: 'Mã xác nhận gửi về điện thoại', private: true }, { text: 'Ảnh thẻ học sinh còn rõ thông tin', private: true }, { text: 'Công thức món ăn em thích', private: false }, { text: 'Bài hát cả lớp đang tập', private: false }, { text: 'Tên đăng nhập kèm mật khẩu', private: true }, { text: 'Lịch đi xa của cả gia đình', private: true }] },
     { id: 'shield-coder', type: 'ml-lab', icon: '🍃', title: 'Phòng lab học máy với lá', description: 'Tự gắn nhãn nhiều mẫu lá, huấn luyện trên thiết bị, thử lá chưa dùng để học rồi đổi một nhãn để so sánh hai phiên bản.', image: '/images/grade-4-shield-coder.webp', ministry: '4.C5.MR1–MR2 · 4.D2.1', aiApp: 'Học máy có giám sát chạy trên thiết bị' }
   ],
   5: [
     { id: 'fair-data-lab', type: 'balance', icon: '⚖️', title: 'Kiểm tra dữ liệu đại diện', description: 'Cân mẫu giọng nói từ ba vùng, đọc kết quả riêng từng nhóm và nhận ra vì sao số lượng bằng nhau vẫn chưa bảo đảm công bằng.', image: '/images/grade-5-fair-data-lab.webp', ministry: '5.B1.1–2 · 5.B2.1–MR1', aiApp: 'Mô phỏng kiểm tra đại diện và kết quả theo nhóm', groups: ['Giọng miền Bắc', 'Giọng miền Trung', 'Giọng miền Nam'], total: 12, target: 4, testResults:[{correct:8,total:10},{correct:6,total:10},{correct:7,total:10}] },
-    { id: 'ai-pipeline-code', type: 'pipeline', icon: '🚀', title: 'Mô hình hóa pipeline AI', description: 'Lắp pipeline phân loại rác, tạo phiên bản A, bổ sung kiểm thử và cách xử lý vật lạ rồi so sánh minh chứng với phiên bản B.', image: '/images/grade-5-ai-pipeline-code.webp', ministry: '5.C5.2–MR3 · 5.D1.1 · 5.D2.1–MR1', aiApp: 'Mô phỏng kiến trúc pipeline và kiểm thử theo nhóm', stages: ['Xác định vấn đề', 'Thu thập dữ liệu an toàn', 'Huấn luyện mô hình', 'Kiểm thử theo nhóm', 'Ghi lỗi và cải tiến'] }
+    { id: 'ai-pipeline-code', type: 'pipeline', icon: '🚀', title: 'Mô hình hóa pipeline AI', description: 'Lắp pipeline phân loại rác, tạo phiên bản A, bổ sung kiểm thử và cách xử lý vật lạ rồi so sánh minh chứng với phiên bản B.', image: '/images/grade-5-ai-pipeline-code.webp', ministry: '5.C5.2–MR3 · 5.D1.1 · 5.D2.1–MR1', aiApp: 'Mô phỏng kiến trúc pipeline và kiểm thử theo nhóm', stages: ['Xác định vấn đề', 'Thu thập dữ liệu an toàn', 'Huấn luyện mô hình', 'Kiểm thử theo nhóm', 'Ghi lỗi và cải tiến'], icons: ['🎯', '📦', '🧠', '🧪', '🔧'] }
   ]
 }
 

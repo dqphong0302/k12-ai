@@ -4,17 +4,17 @@ import { workshopGames } from './primaryWorkshopGames.js'
 const workshop = (id,title,ministry) => ({id,title,ministry,type:'workshop',version:4,icon:'🛠️',image:`/images/${id}.webp`,aiApp:'Mô phỏng giáo dục cục bộ · không gửi dữ liệu',...workshopGames[id]})
 const round = (prompt, answer, distractors, explanation, skill='VẬN DỤNG') => ({prompt,options:[answer,...distractors],correct:0,explanation,skill})
 const quest = (id,title,ministry,rounds) => ({id,type:'challenge',title,ministry,icon:'🧭',description:`${title}: ${rounds.length} tình huống về ${rounds.map(r=>r.skill.toLowerCase()).join(", ")}.`,aiApp:'Tình huống mô phỏng · con người kiểm tra và quyết định',image:`/images/${id}.webp`,rounds:rounds.map((r,i)=>{const shift=(i+1)%r.options.length;return {...r,options:[...r.options.slice(shift),...r.options.slice(0,shift)],correct:(r.options.length-shift)%r.options.length}})})
-const sort = (id,title,ministry,groups,items) => ({id,title,ministry,type:'sorting',icon:'🧺',description:`${title}: phân biệt ${groups.join(' và ')} qua ${items.length} thẻ dữ liệu.`,aiApp:'Mô phỏng phân loại dữ liệu theo tiêu chí',image:`/images/${id}.webp`,groups,items:items.map(([label,group])=>({label,group,icon:'🔎'}))})
-const sequence = (id,title,ministry,sequenceItems) => ({id,title,ministry,type:'sequence',icon:'🧩',description:`${title}: xếp ${sequenceItems.length} bước, bắt đầu từ ${sequenceItems[0].toLowerCase()}.`,aiApp:'Mô phỏng quy trình · không huấn luyện mô hình thật',image:`/images/${id}.webp`,sequenceItems})
+const sort = (id,title,ministry,groups,items) => ({id,title,ministry,type:'sorting',icon:'🧺',description:`${title}: phân biệt ${groups.join(' và ')} qua ${items.length} thẻ dữ liệu.`,aiApp:'Mô phỏng phân loại dữ liệu theo tiêu chí',image:`/images/${id}.webp`,groups,items:items.map(([label,group,aiWrong])=>({label,group,icon:'🔎',...(aiWrong?{aiWrong:true}:{})}))})
+const sequence = (id,title,ministry,sequenceItems,icons) => ({id,title,ministry,type:'sequence',icon:'🧩',description:`${title}: xếp ${sequenceItems.length} bước, bắt đầu từ ${sequenceItems[0].toLowerCase()}.`,aiApp:'Mô phỏng quy trình · không huấn luyện mô hình thật',image:`/images/${id}.webp`,sequenceItems,icons})
 
 export const primaryAdvancedGames = {
   3: [
     workshop('grade-3-ai-study','Đội trưởng học tập tự chủ','3.A1.1 · 3.A1.2 · 3.A1.3 · 3.A3.1 · 3.A3.2'),
     sort('grade-3-feature-sort','Kính lúp đặc trưng','3.C4.1 · 3.C4.MR1',['Đặc trưng quan sát được','Nhãn nhóm'],[
-      ['Màu xanh của chiếc lá',0],['Tên nhóm: lá dài',1],['Chiều dài 8 cm',0],['Tên nhóm: trái cây',1],['Bề mặt có đốm vàng',0],['Tên nhóm: đồ chơi',1],['Khối lượng 100 g',0],['Hình gần tròn',0],['Tên nhóm: chai nhựa',1],['Có ba góc',0]
+      ['Màu xanh của chiếc lá',0],['Tên nhóm: lá dài',1],['Chiều dài 8 cm',0],['Tên nhóm: trái cây',1,true],['Khối lượng 100 g',0],['Bề mặt có đốm vàng',0],['Tên nhóm: đồ chơi',1],['Hình gần tròn',0],['Có ba góc',0],['Tên nhóm: chai nhựa',1]
     ]),
     workshop('grade-3-if-then','Vườn luật Nếu–Thì','3.C5.1 · 3.C5.MR1'),
-    sequence('grade-3-train-order','Chuyến tàu huấn luyện','3.C5.2 · 3.D1.1',['Chọn hai nhóm cần phân loại','Thu thập ví dụ của mỗi nhóm','Kiểm tra và đặt nhãn đúng','Cho máy học từ ví dụ','Thử với mẫu chưa dùng để học','Ghi lỗi và cải thiện dữ liệu']),
+    sequence('grade-3-train-order','Chuyến tàu huấn luyện','3.C5.2 · 3.D1.1',['Chọn hai nhóm cần phân loại','Thu thập ví dụ của mỗi nhóm','Kiểm tra và đặt nhãn đúng','Cho máy học từ ví dụ','Thử với mẫu chưa dùng để học','Ghi lỗi và cải thiện dữ liệu'],['🎯','📸','🏷️','🧠','🧪','🔧']),
     workshop('grade-3-clean-data','Bệnh viện thẻ dữ liệu','3.D2.1 · 3.D2.2 · 3.D2.3'),
     quest('grade-3-kind-ai','Biệt đội AI tử tế','3.B2.1 · 3.B3.1',[
       round('Bạn định ghép ảnh AI để trêu ngoại hình một bạn khác. Em làm gì?','Khuyên dừng và nhờ người lớn hỗ trợ',['Chia sẻ để nhiều người cười','Giấu tên rồi đăng'],'Ảnh giả vẫn có thể làm tổn thương người thật.','ĐẠO ĐỨC'),
@@ -30,7 +30,7 @@ export const primaryAdvancedGames = {
     workshop('grade-4-human-control','Trạm quyết định của con người','4.A1.2 · 4.A3.1 · 4.A3.MR1'),
     workshop('grade-4-data-collector','Thợ săn mẫu lá','4.C5.MR1 · 4.C5.MR2 · 4.D1.1'),
     workshop('grade-4-model-test','Phòng kiểm thử mẫu mới','4.C5.MR1 · 4.C5.MR2 · 4.D2.1'),
-    sequence('grade-4-design-workshop','Xưởng ý tưởng giúp trường','4.D1.1 · 4.D1.MR1 · 4.D2.1',['Hỏi ai đang gặp khó khăn','Mô tả một vấn đề cụ thể','Chọn đầu vào và kết quả mong muốn','Chuẩn bị ví dụ phù hợp, an toàn','Làm thử và kiểm tra với mẫu mới','Ghi lỗi rồi sửa ý tưởng']),
+    sequence('grade-4-design-workshop','Xưởng ý tưởng giúp trường','4.D1.1 · 4.D1.MR1 · 4.D2.1',['Hỏi ai đang gặp khó khăn','Mô tả một vấn đề cụ thể','Chọn đầu vào và kết quả mong muốn','Chuẩn bị ví dụ phù hợp, an toàn','Làm thử và kiểm tra với mẫu mới','Ghi lỗi rồi sửa ý tưởng'],['🙋','📝','🎯','📦','🧪','🔧']),
     quest('grade-4-privacy-rescue','Đội cứu hộ riêng tư','4.B2.1 · 4.B2.2 · 4.B2.MR1',[
       round('Em lỡ gửi mật khẩu vào chatbot. Bước đúng?','Báo người lớn và đổi mật khẩu qua nơi chính thức',['Chỉ xóa tin nhắn là đủ','Gửi thêm mã xác nhận'],'Xóa tin nhắn không bảo đảm dữ liệu đã biến mất; cần xử lý tài khoản.','ỨNG PHÓ'),
       round('Ảnh vé có mã vuông và tên em. Trước khi chia sẻ cần?','Không đăng nguyên ảnh; nhờ người lớn kiểm tra',['Chỉ che mặt','Để mã rõ cho đẹp'],'Mã và tên cũng có thể chứa thông tin riêng tư.','DỮ LIỆU ẨN'),

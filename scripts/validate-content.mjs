@@ -13,6 +13,13 @@ export function validateRegistry(registry) {
       const level=activity.grade<=5?'primary':activity.grade<=9?'middle':'high'
       let signature
       if(level==='primary') {
+        const refs=activity.content?.standards?.split(' · ')||[]
+        const codes={A:'NLa',B:'NLb',C:'NLc',D:'NLd'}
+        const strandRefs=[...new Set(refs.map(ref=>codes[ref.split('.')[1]?.[0]]))]
+        if(activity.strand?.code!==activity.content?.code||activity.content?.code!==strandRefs[0])errors.push('mạch chính Tiểu học không khớp mã chuẩn và nội dung')
+        if(JSON.stringify(activity.strandRefs)!==JSON.stringify(strandRefs))errors.push('strandRefs Tiểu học phải giữ đủ các mạch của mã chuẩn')
+        if(JSON.stringify(activity.standardRefs)!==JSON.stringify(refs))errors.push('standardRefs Tiểu học không khớp nội dung')
+        if(JSON.stringify(activity.coreStandardRefs)!==JSON.stringify(refs.filter(ref=>!ref.includes('.MR')))||JSON.stringify(activity.extensionStandardRefs)!==JSON.stringify(refs.filter(ref=>ref.includes('.MR'))))errors.push('phân loại cốt lõi/mở rộng Tiểu học không khớp mã chuẩn')
         if(activity.title!==activity.content?.title)errors.push('tiêu đề activity không khớp nội dung tiết Tiểu học')
         if(activity.evidenceRef!==activity.content?.thinkQuestion)errors.push('evidenceRef Tiểu học không khớp câu hỏi minh chứng')
         if(!activity.content?.quiz?.question||!Array.isArray(activity.content?.steps))errors.push('thiếu quiz hoặc thực hành riêng của tiết Tiểu học')
@@ -42,6 +49,15 @@ export function validateRegistry(registry) {
 const missingRef=structuredClone(activityRegistry)
 missingRef[0].evidenceRef=''
 if(!validateRegistry(missingRef).some(message=>message.includes('evidenceRef')))throw new Error('Validator không phát hiện evidenceRef bị thiếu')
+
+for(const id of ['primary-2-6','primary-2-12','primary-4-8','primary-4-11']) {
+  const broken=structuredClone(activityRegistry)
+  broken.find(activity=>activity.id===id).strand={code:'NLd'}
+  if(!validateRegistry(broken).some(message=>message.includes('mạch chính')))throw new Error(`Validator bỏ sót mạch sai: ${id}`)
+}
+const missingSecondaryStrand=structuredClone(activityRegistry)
+missingSecondaryStrand.find(activity=>activity.id==='primary-2-12').strandRefs=['NLa']
+if(!validateRegistry(missingSecondaryStrand).some(message=>message.includes('strandRefs')))throw new Error('Validator bỏ sót mạch phụ')
 
 const brokenContract=structuredClone(activityRegistry)
 brokenContract[0].teacher.setup=[]

@@ -5,7 +5,7 @@ export const grades = [
   { id: 2, label: 'Lớp 2', age: '7–8 tuổi', color: '#f4bd36', titles: ['Khi nào nên dùng AI?', 'AI làm việc, người kiểm soát', 'AI trong gia đình', 'AI học từ đâu?', 'Phân loại đồ vật', 'Con người dạy AI', 'Ý tưởng máy thông minh', 'Dữ liệu có vai trò gì?', 'Thử dạy Bo-Bo phân loại', 'Của bạn và của tớ', 'Đối xử công bằng', 'Dùng AI có trách nhiệm'] },
   { id: 3, label: 'Lớp 3', age: '8–9 tuổi', color: '#64bf79', titles: ['AI trong học tập', 'Không phụ thuộc vào AI', 'Kiểm tra câu trả lời AI', 'Dữ liệu là gì?', 'Đặc trưng của dữ liệu', 'AI dựa trên luật', 'Quá trình huấn luyện', 'Dữ liệu tốt cho máy', 'Khi máy học sai', 'Phân biệt thật và giả', 'Cùng máy làm việc tốt', 'Bản quyền của bạn và tớ'] },
   { id: 4, label: 'Lớp 4', age: '9–10 tuổi', color: '#3da7e8', titles: ['AI trong công việc hằng ngày', 'AI hỗ trợ, người suy nghĩ', 'AI vì cuộc sống tốt đẹp', 'Ứng dụng AI quen thuộc', 'Khám phá học máy', 'AI nhìn và nghe', 'Từ vấn đề đến ý tưởng AI', 'Thu thập ví dụ đúng', 'Liên tục cải tiến AI', 'Bảo vệ thông tin cá nhân', 'Quyết định khi dùng AI', 'Thử thách hiệp sĩ dữ liệu'] },
-  { id: 5, label: 'Lớp 5', age: '10–11 tuổi', color: '#8068da', titles: ['Con người chịu trách nhiệm', 'AI không thay thế con người', 'Công dân trong kỷ nguyên AI', 'Thuật toán dựa trên luật', 'Công cụ học máy trực quan', 'Kiểm tra kết quả AI', 'Quy trình huấn luyện AI', 'Cải tiến bằng dữ liệu', 'Thiết kế giải pháp AI', 'Hệ thống AI công bằng', 'Giúp AI công bằng', 'Hiểu cách AI suy nghĩ'] }
+  { id: 5, label: 'Lớp 5', age: '10–11 tuổi', color: '#8068da', titles: ['Con người chịu trách nhiệm', 'AI không thay thế con người', 'Công dân trong kỷ nguyên AI', 'Thuật toán dựa trên luật', 'Công cụ học máy trực quan', 'Kiểm tra kết quả AI', 'Quy trình huấn luyện AI', 'Cải tiến bằng dữ liệu', 'Thiết kế giải pháp AI', 'Hệ thống AI công bằng', 'Giúp AI công bằng', 'Kiểm tra căn cứ dự đoán của AI'] }
 ]
 
 export const strands = [
@@ -80,10 +80,12 @@ const theorySentences = text => {
   return sentences
 }
 
-export function getLessonContent({ grade, index, title, strand }) {
+export function getLessonContent({ grade, index, title }) {
   const detail = primaryLessonDetails[grade]?.[index]
   if (!detail) throw new Error(`Thiếu nội dung lớp ${grade}, tiết ${index+1}`)
-  strand = strands.find(item=>item.short===detail.standards.split('.')[1][0])
+  // The strand comes from the ministry code of the lesson, not from its position in the block:
+  // a few lessons (e.g. lớp 2 tiết 6, lớp 4 tiết 11) sit outside the usual 3-3-3-3 grouping.
+  const strand = strands.find(item=>item.short===detail.standards.split('.')[1][0])
   const stage = Math.floor(index / 3) + 1
   const meta = strandMeta[strand.code]
   return {
@@ -99,10 +101,6 @@ export function getLessonContent({ grade, index, title, strand }) {
     goal: `Em sẽ ${detail.steps[2].charAt(0).toLowerCase()+detail.steps[2].slice(1)}.`,
     explanation: detail.focus,
     theoryPoints: theorySentences(detail.focus),
-    vocabulary: [
-      {term:'Khái niệm chính',meaning:detail.focus.split('. ')[0]+'.'},
-      {term:'Điều cần kiểm tra',meaning:detail.quiz.explanation}
-    ],
     example: detail.example,
     thinkQuestion: `${detail.quiz.question} Hãy nêu bằng chứng hoặc một ví dụ khác để giải thích.`,
     mechanism: detail.quiz.explanation,

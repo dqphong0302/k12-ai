@@ -221,7 +221,7 @@ function TeacherReview({ activities, onSaved }) {
   const save=async()=>{
     setBusy(true);setMessage('')
     try{
-      await saveTeacherAssessment(selected.recordId,{ratings:Object.fromEntries(Object.entries(ratings).map(([key,value])=>[key,Number(value)])),note})
+      await saveTeacherAssessment(selected.recordId,{ratings:Object.fromEntries(Object.entries(ratings).filter(([,value])=>value!=='').map(([key,value])=>[key,Number(value)])),note})
       setMessage('Đã lưu đánh giá cho đúng lượt hiện tại.');await onSaved()
     }catch(error){setMessage(error.message || 'Không lưu được đánh giá.')}
     finally{setBusy(false)}
@@ -236,13 +236,14 @@ function TeacherReview({ activities, onSaved }) {
   return <section className="teacher-review">
     <h3>Đánh giá theo minh chứng</h3>
     <label>Bản ghi<select id="teacher-review-record" value={selected.recordId} onChange={event=>setRecordId(event.target.value)}>{activities.map(item=><option key={item.recordId} value={item.recordId}>{item.sessionId} / {item.learnerOrGroupId} / {item.activityId}</option>)}</select></label>
-    <div className="review-status"><span>{selected.status==='complete'?'✓ Hoàn thành':'○ Chưa hoàn thành'}</span><span>{selected.evidenceReady?'✓ Có minh chứng':'○ Chưa đủ minh chứng'}</span><span>{selected.teacherReviewed?'✓ Đã đánh giá':'○ Chưa đánh giá'}</span></div>
+    <div className="review-status"><span>{selected.status==='complete'?'✓ Hoàn thành':'○ Chưa hoàn thành'}</span><span>{selected.evidenceReady?'✓ Có minh chứng':'○ Chưa đủ minh chứng'}</span><span>{selected.teacherReviewed?'✓ Đã đánh giá':selected.teacherPartiallyReviewed?'○ Đã chấm một phần':'○ Chưa đánh giá'}</span></div>
     <p>{selected.evidenceCount} minh chứng · lượt {selected.attemptId}. Sao trò chơi không quyết định mức rubric.</p>
     <details className="teacher-artifact"><summary>Xem artifact lượt hiện tại</summary><pre id="teacher-artifact">{JSON.stringify(selected.artifact,null,2)}</pre></details>
     {definition?.grade<=2&&<div className="teacher-observation"><label><input id="teacher-observed-explanation" type="checkbox" checked={observed} onChange={event=>setObserved(event.target.checked)}/><span>Đã nghe học sinh giải thích hoặc chỉ vào lựa chọn</span></label><small>Chỉ lưu dấu xác nhận cục bộ; không thu âm học sinh.</small><button id="save-teacher-observation" disabled={busy||observed===selected.teacherObserved} onClick={saveObservation}>Lưu xác nhận</button>{selected.teacherObserved&&<b>✓ Giáo viên đã nghe giải thích</b>}</div>}
     {Object.entries(rubricDimensions).map(([key,label])=>{const guide=definition?.assessment?.dimensionRubric?.[key];return <label key={key}>{label}<select id={`teacher-rating-${key}`} value={ratings[key]} onChange={event=>setRatings(current=>({...current,[key]:event.target.value}))}><option value="">Chưa chấm</option><option value="1">1 · Cần hỗ trợ</option><option value="2">2 · Đạt</option><option value="3">3 · Vận dụng</option></select>{guide&&<small className="rubric-guide">{guide.map((text,index)=><span key={text}><b>{index+1}.</b> {text}</span>)}</small>}</label>})}
     <label>Nhận xét<textarea id="teacher-review-note" maxLength={1000} value={note} onChange={event=>setNote(event.target.value)}/></label>
-    <button id="save-teacher-review" disabled={busy||Object.values(ratings).some(value=>!value)} onClick={save}>Lưu đánh giá lượt {selected.attemptId}</button>
+    <p>Để “Chưa chấm” ở chiều chưa quan sát. Lưu một phần không được tính là đã chấm đủ rubric.</p>
+    <button id="save-teacher-review" disabled={busy||Object.values(ratings).every(value=>!value)} onClick={save}>Lưu đánh giá lượt {selected.attemptId}</button>
     {message&&<p role="status">{message}</p>}
   </section>
 }
