@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react'
+import { scoreForMistakes } from '../runtime/activityRuntime.js'
 import { Bot, Check, RotateCcw, Sparkles, Star, Trophy, X } from 'lucide-react'
 import { trainLeafModel } from '../adapters/leafModelAdapter.js'
 import { hasLeafComparison, leafLearningEngine } from '../engines/leafLearningEngine.js'
@@ -45,7 +46,7 @@ export default function PrimaryLeafLab({ game, best, close, onComplete }) {
           <p className={comparisonReady ? 'game-message success' : 'game-message'} aria-live="polite">{leafLearningEngine.getFeedback(session.data)}</p>
           {session.storageError && <p className="game-message" role="alert">{session.storageError}</p>}
         </div>}
-        <footer className="game-modal-footer"><span>{best ? `Kỷ lục: ${best}/3 sao` : 'Mô hình dùng dữ liệu tổng hợp nhỏ; kết quả chỉ phục vụ quan sát.'}</span><div className="live-stars"><Star size={17} fill="currentColor"/> {Math.max(1, 3 - Math.min(2, session.data.mistakes))}/3 sao</div></footer>
+        <footer className="game-modal-footer"><span>{best ? `Kỷ lục: ${best}/3 sao` : 'Mô hình dùng dữ liệu tổng hợp nhỏ; kết quả chỉ phục vụ quan sát.'}</span><div className="live-stars"><Star size={17} fill="currentColor"/> {scoreForMistakes(session.data.mistakes)}/3 sao</div></footer>
       </> : <div className="game-complete"><span className="reward-cup"><Trophy/></span><small>HOÀN THÀNH PHÒNG LAB</small><h2 id="leaf-lab-title">Em đã kiểm thử một mô hình thật!</h2><p>Hai cấu hình dữ liệu và phần giải thích đã được lưu trên thiết bị.</p><div className="reward-stars" aria-label={`${session.state.score} sao`}>{[1, 2, 3].map(value => <Star key={value} fill={value <= session.state.score ? 'currentColor' : 'none'}/>)}</div><div className="complete-actions"><button id="game-replay" className="secondary" onClick={session.restart}><RotateCcw size={17}/> Làm lại</button><button id="game-finish" className="primary" onClick={close}>Nhận sao <Check size={17}/></button></div></div>}
     </section>
   </div>

@@ -1,4 +1,4 @@
-import { defineGameEngine } from '../runtime/activityRuntime.js'
+import { defineGameEngine, scoreForMistakes } from '../runtime/activityRuntime.js'
 import { projectCanvasEngine } from './projectCanvasEngine.js'
 import { genAIEngine } from './ragEngine.js'
 import { studyRows, studyTrainIds, validateStudyRows } from './dataEvaluation.js'
@@ -21,7 +21,7 @@ export const pipelineLabEngine = makeEngine({
     if(action.type==='test-case'&&Object.hasOwn(state.testCases,action.id))return {...state,testCases:{...state.testCases,[action.id]:Boolean(action.checked)},completed:false,score:null}
     if(action.type==='finish-project'&&Number(activity?.grade)===9) {
       const ready=state.pipelineValid&&state.modelConfig&&grade9ProjectFields.every(field=>state.project[field].trim().length>=20)&&Object.values(state.testCases).every(Boolean)
-      return ready?{...state,completed:true,score:Math.max(1,3-state.mistakes)}:state
+      return ready?{...state,completed:true,score:scoreForMistakes(state.mistakes)}:state
     }
     if (action.type === 'move' && [-1,1].includes(action.direction)) {
       const index=state.program.indexOf(action.id),target=index+action.direction
@@ -39,7 +39,7 @@ export const pipelineLabEngine = makeEngine({
       let message=missing?reasons[missing]:state.program[0]!=='problem'?'Xác định vấn đề trước khi chọn dữ liệu hoặc mô hình.':state.program.indexOf('data')>state.program.indexOf('train')?'Mô hình cần dữ liệu trước khi được huấn luyện.':state.program.indexOf('train')>state.program.indexOf('test')?'Phải có mô hình đã huấn luyện trước khi kiểm thử dự đoán.':state.testInTrain?'Rò rỉ dữ liệu: test-new-1 đã đi vào bước huấn luyện nên kết quả kiểm thử không còn độc lập.':'Con người cần xem bằng chứng kiểm thử trước khi quyết định.'
       const trace=state.program.map(id=>({id,detail:{problem:'Chốt mục tiêu: phân loại lá',data:'Tách 4 ID train và 2 ID test',train:state.testInTrain?'Fit 5 mẫu, gồm test-new-1 ⚠':'Fit đúng 4 ID train',test:state.testInTrain?'Test không còn độc lập':'Đánh giá 2 ID chưa dùng để học',human:'Đọc bằng chứng trước quyết định'}[id]}))
       if(passed&&Number(activity?.grade)===9)return {...state,trace,pipelineValid:true,completed:false,score:null,message:'Pipeline hợp lệ. Hãy liên kết model, bộ test và canvas dự án.'}
-      return passed ? { ...state,trace,pipelineValid:true, completed: true, score: Math.max(1, 3 - state.mistakes) } : { ...state,trace,pipelineValid:false, mistakes: state.mistakes + 1, completed:false, score:null, message }
+      return passed ? { ...state,trace,pipelineValid:true, completed: true, score: scoreForMistakes(state.mistakes) } : { ...state,trace,pipelineValid:false, mistakes: state.mistakes + 1, completed:false, score:null, message }
     }
     return state
   },
@@ -77,8 +77,8 @@ export function evaluateMlThreshold(samples, threshold) {
 }
 
 export const mlLabEngine = makeEngine({
-  initialState: () => ({ a: 2, b: 2, datasetEdits:{}, status: 'idle', epoch: 0, accuracy: 0, prediction: null, checks: 0, testedSamples: {}, threshold: .3, metricRuns: [], mistakes: 0, completed: false }),
-  hydrate: state => state.status === 'loading' || state.status === 'trained' ? { ...state, datasetEdits:state.datasetEdits||{},status: 'idle', epoch: 0, prediction: null, checks: 0, testedSamples:{}, metricRuns:[] } : { ...state, datasetEdits:state.datasetEdits||{},threshold:state.threshold??.3, testedSamples:state.testedSamples||{}, metricRuns:state.metricRuns||[] },
+  initialState: () => ({ a: 2, b: 2, datasetEdits:{}, status: 'idle', epoch: 0, accuracy: 0, prediction: null, checks: 0, testedSamples: {}, threshold: .3, metricRuns: [], mistakes: 0, systemErrors: 0, completed: false }),
+  hydrate: state => state.status === 'loading' || state.status === 'trained' ? { ...state, datasetEdits:state.datasetEdits||{},status: 'idle', epoch: 0, prediction: null, checks: 0, testedSamples:{}, metricRuns:[], systemErrors:state.systemErrors||0 } : { ...state, datasetEdits:state.datasetEdits||{},threshold:state.threshold??.3, testedSamples:state.testedSamples||{}, metricRuns:state.metricRuns||[], systemErrors:state.systemErrors||0 },
   reduce(state, action, activity) {
     if (action.type === 'reset') return this.initialState()
     if (action.type === 'add' && ['a','b'].includes(action.group)) return { ...state, [action.group]: Math.min(6, state[action.group] + 1), status: 'idle', epoch: 0, prediction: null, checks: 0, testedSamples: {}, metricRuns:[], completed: false, score: null }
@@ -91,11 +91,11 @@ export const mlLabEngine = makeEngine({
       const datasetEdits={...state.datasetEdits,[action.id]:{...(state.datasetEdits[action.id]||{}),[action.field]:value}}
       return {...state,datasetEdits,status:'idle',epoch:0,accuracy:0,prediction:null,checks:0,testedSamples:{},metricRuns:[],completed:false,score:null}
     }
-    if (action.type === 'train-start') return { ...state, status: 'loading', epoch: 0, prediction: null, checks: 0, testedSamples: {}, metricRuns:[], completed: false, score: null }
+    if (action.type === 'train-start') return { ...state, status: 'loading', epoch: 0, prediction: null, checks: 0, testedSamples: {}, metricRuns:[], mistakes: 0, completed: false, score: null }
     if (action.type === 'epoch') return { ...state, epoch: action.epoch, accuracy: action.accuracy }
     if (action.type === 'trained') return { ...state, status: 'trained', accuracy: action.accuracy }
     if (action.type === 'invalidate-model' && state.status === 'trained') return { ...state, status: 'idle', epoch: 0, prediction: null, checks: 0, testedSamples:{}, metricRuns:[] }
-    if (action.type === 'train-error') return { ...state, status: 'error', mistakes: state.mistakes + 1 }
+    if (action.type === 'train-error') return { ...state, status: 'error', systemErrors: (state.systemErrors || 0) + 1 }
     if (action.type === 'predict' && state.status === 'trained' && ['healthy', 'sick'].includes(action.sampleId)) {
       const testedSamples = { ...(state.checks ? state.testedSamples : {}), [action.sampleId]: action.prediction }
       return { ...state, prediction: action.prediction, testedSamples, checks: Object.keys(testedSamples).length, mistakes: state.mistakes + (action.prediction.label === action.prediction.expected ? 0 : 1) }
@@ -110,8 +110,8 @@ export const mlLabEngine = makeEngine({
     if (action.type === 'finish' && state.status === 'trained') {
       const grade=Number(activity?.grade)
       const compared=state.metricRuns.length>=2&&new Set(state.metricRuns.map(run=>run.threshold)).size>=2
-      if(grade===8&&compared)return { ...state, completed: true, score: Math.max(1, 3 - state.mistakes) }
-      if(grade!==8&&state.checks>=2&&state.testedSamples?.healthy&&state.testedSamples?.sick)return { ...state, completed: true, score: Math.max(1, 3 - state.mistakes) }
+      if(grade===8&&compared)return { ...state, completed: true, score: scoreForMistakes(state.mistakes) }
+      if(grade!==8&&state.checks>=2&&state.testedSamples?.healthy&&state.testedSamples?.sick)return { ...state, completed: true, score: scoreForMistakes(state.mistakes) }
     }
     return state
   },
@@ -163,14 +163,14 @@ export const promptCodeEngine = makeEngine({
       const run={id:sample.id,title:sample.title,input:{role:sample.role,task:sample.task,context:sample.context},...inspected}
       const promptRuns=[...state.promptRuns.filter(item=>item.id!==sample.id),run]
       const completed=state.codePassed&&promptTestCases.every(item=>promptRuns.some(runItem=>runItem.id===item.id))
-      return {...state,role:sample.role,task:sample.task,context:sample.context,activeCaseId:sample.id,...inspected,promptRuns,completed,score:completed?Math.max(1,3-state.mistakes):null}
+      return {...state,role:sample.role,task:sample.task,context:sample.context,activeCaseId:sample.id,...inspected,promptRuns,completed,score:completed?scoreForMistakes(state.mistakes):null}
     }
     if (action.type === 'add-block' && !state.program.includes(action.id)) return { ...state, program: [...state.program, action.id] }
     if (action.type === 'run-code') {
       const passed = state.program.join() === ['input', 'filter', 'model', 'verify'].join()
       if(!passed)return { ...state, program: [], codePassed:false, completed:false,score:null,mistakes: state.mistakes + 1 }
       const completed=promptTestCases.every(item=>state.promptRuns.some(run=>run.id===item.id))
-      return { ...state, codePassed:true,completed,score:completed?Math.max(1,3-state.mistakes):null }
+      return { ...state, codePassed:true,completed,score:completed?scoreForMistakes(state.mistakes):null }
     }
     return state
   },
@@ -199,7 +199,7 @@ export const biasDetectiveEngine = makeEngine({
       }
       return {...state,audit:{measure:state.measure,before:[92,61],...outcomes[state.measure],groups:['Giọng phổ biến','Giọng địa phương']}}
     }
-    if(action.type==='finish'&&state.audit)return {...state,completed:true,score:Math.max(1,3-state.mistakes)}
+    if(action.type==='finish'&&state.audit)return {...state,completed:true,score:scoreForMistakes(state.mistakes)}
     return state
   },
   isComplete: state => state.completed,
@@ -221,7 +221,7 @@ export const impactEngine = makeEngine({
       const required = item.requiredControls || [0, 1, 2]
       const controlsFit = required.every(index => state.checks[index])
       const hasEvidence = Boolean(state.stakeholder) && state.riskNote.trim().length >= 12
-      if (controlsFit && hasEvidence) return { ...state, completed: true, score: Math.max(1, 3 - state.mistakes) }
+      if (controlsFit && hasEvidence) return { ...state, completed: true, score: scoreForMistakes(state.mistakes) }
     }
     return state
   },
@@ -238,8 +238,8 @@ export const impactEngine = makeEngine({
 })
 
 export const dataLabEngine = makeEngine({
-  initialState: () => ({ clean: false, analyzed: false, trained: false, modelResult: null, training: false, runId: null, runs: [], threshold: 7, featureSet: 'hours', drift: null, driftMonitor: '', mistakes: 0, completed: false }),
-  hydrate: state => ({ ...state, runs:Array.isArray(state.runs)?state.runs:[], threshold: state.threshold ?? 7, featureSet: ['hours','hours-missing'].includes(state.featureSet) ? state.featureSet : 'hours', drift: state.drift || null, driftMonitor: state.driftMonitor || '', training: false, runId: null }),
+  initialState: () => ({ clean: false, analyzed: false, trained: false, modelResult: null, training: false, runId: null, runs: [], threshold: 7, featureSet: 'hours', drift: null, driftMonitor: '', mistakes: 0, systemErrors: 0, completed: false }),
+  hydrate: state => ({ ...state, runs:Array.isArray(state.runs)?state.runs:[], threshold: state.threshold ?? 7, featureSet: ['hours','hours-missing'].includes(state.featureSet) ? state.featureSet : 'hours', drift: state.drift || null, driftMonitor: state.driftMonitor || '', training: false, runId: null, systemErrors: state.systemErrors || 0 }),
   reduce(state, action) {
     if (action.type === 'reset') return this.initialState()
     if (action.type === 'clean') return { ...state, clean: true }
@@ -268,7 +268,7 @@ export const dataLabEngine = makeEngine({
       const run={runId:action.runId,datasetSignature:dataset.map(row=>`${row.id}:${row.group}:${row.hours??'NA'}:${row.score}`).join('|'),dataset,config:structuredClone(action.result?.config||{}),mae:action.result?.mae,accuracy:action.result?.accuracy,predictions:structuredClone(action.result?.predictions||[])}
       return { ...state, training: false, trained: true, modelResult: action.result, runs:[...(state.runs||[]),run].slice(-10) }
     }
-    if (action.type === 'train-error' && state.training && action.runId === state.runId) return { ...state, training: false, trained: false, modelResult: 'error', mistakes: state.mistakes + 1 }
+    if (action.type === 'train-error' && state.training && action.runId === state.runId) return { ...state, training: false, trained: false, modelResult: 'error', systemErrors: (state.systemErrors || 0) + 1 }
     if (action.type === 'drift-check' && state.trained && action.result) return { ...state, drift: structuredClone(action.result), completed: false, score: null }
     if (action.type === 'drift-monitor' && ['collect-more','human-review','retrain'].includes(action.value)) return { ...state, driftMonitor: action.value, completed: false, score: null }
     if (action.type === 'finish' && state.trained && (Number(action.grade) !== 12 || (state.drift && state.driftMonitor))) return { ...state, completed: true, score: 3 }

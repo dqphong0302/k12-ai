@@ -1,4 +1,4 @@
-import { defineGameEngine } from '../runtime/activityRuntime.js'
+import { defineGameEngine, scoreForMistakes } from '../runtime/activityRuntime.js'
 
 export const gardenDataset=[
   {id:'apple',name:'Táo',icon:'🍎',plantPart:1,seedsInside:1,label:'fruit'},
@@ -47,7 +47,7 @@ export const dataGardenEngine=defineGameEngine({
     if(action.type==='reason')return {...state,reason:String(action.value||''),completed:false,score:null}
     const compared=state.runs.length>=2&&new Set(state.runs.map(run=>run.datasetSignature)).size>=2
     const fixed=state.corrections.some(item=>item.id==='radish'&&item.to==='other')
-    if(action.type==='finish'&&compared&&fixed&&state.reason==='label-evidence')return {...state,completed:true,score:Math.max(1,3-state.mistakes)}
+    if(action.type==='finish'&&compared&&fixed&&state.reason==='label-evidence')return {...state,completed:true,score:scoreForMistakes(state.mistakes)}
     return state
   },
   isComplete:state=>state.completed,

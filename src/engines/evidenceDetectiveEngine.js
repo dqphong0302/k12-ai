@@ -1,4 +1,4 @@
-import { defineGameEngine } from '../runtime/activityRuntime.js'
+import { defineGameEngine, scoreForMistakes } from '../runtime/activityRuntime.js'
 
 export const evidenceCases=[
   {id:'school-closure',claim:'Ngày mai toàn trường nghỉ học vì mưa.',correctSource:'school-schedule',verdict:'refuted',sources:[
@@ -50,7 +50,7 @@ export const evidenceDetectiveEngine=defineGameEngine({
       if(state.selectedSource!==item.correctSource||state.selectedVerdict!==item.verdict)return {...state,mistakes:state.mistakes+1,message:'Đoạn này chưa đủ để kết luận như em chọn. Hãy đọc nội dung, không chỉ nhìn tên nguồn.'}
       const answer={caseId:item.id,claim:item.claim,selectedSource:structuredClone(source),verdict:state.selectedVerdict}
       const answers=[...state.answers,answer]
-      if(answers.length===evidenceCases.length)return {...state,answers,completed:true,score:Math.max(1,3-state.mistakes),message:'Đã kiểm tra đủ sáu phát biểu bằng nội dung nguồn.'}
+      if(answers.length===evidenceCases.length)return {...state,answers,completed:true,score:scoreForMistakes(state.mistakes),message:'Đã kiểm tra đủ sáu phát biểu bằng nội dung nguồn.'}
       return {...state,answers,caseIndex:state.caseIndex+1,selectedSource:null,selectedVerdict:null,message:'Đúng: đoạn trích liên quan trực tiếp đến phát biểu.'}
     }
     return state

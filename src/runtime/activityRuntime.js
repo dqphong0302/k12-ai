@@ -69,8 +69,10 @@ export function activityReducer(state, action) {
   }
 }
 
+// Single source of truth for stars, for both the live counter and the awarded score.
+// Only learner mistakes reach this: device/model failures are tracked as systemErrors.
 export function scoreForMistakes(mistakes) {
-  return Math.max(1, mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1)
+  return mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1
 }
 
 export function serializeActivityState(state) {

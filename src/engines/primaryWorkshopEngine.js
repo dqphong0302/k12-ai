@@ -1,3 +1,4 @@
+import { defineGameEngine } from '../runtime/activityRuntime.js'
 const signature = value => JSON.stringify(value)
 const sameConfig = (a,b) => a && b && Object.keys(a).length===Object.keys(b).length && Object.keys(a).every(key=>signature(a[key])===signature(b[key]))
 const usesAssignments = game => ['data-repair','dataset-split','service-network'].includes(game.mechanic)
@@ -132,7 +133,7 @@ export function workshopReady(state,game) {
   return state.runs.at(-1).passed && new Set(state.runs.map(r=>signature(r.config))).size>=2
 }
 
-export const primaryWorkshopEngine = {
+export const primaryWorkshopEngine = defineGameEngine({
   initialState(game) {
     let config={},assignments={}
     if(game.mechanic==='incident-control')config={events:[]}
@@ -193,5 +194,6 @@ export const primaryWorkshopEngine = {
     return state
   },
   isComplete:state=>Boolean(state.completed),
+  getFeedback:state=>state.message||'',
   serialize:state=>structuredClone(state)
-}
+})

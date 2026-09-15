@@ -14,6 +14,8 @@ export function buildEvidenceReport(records) {
     attempts: record.attempts || 0,
     mistakes: (record.mistakes ?? record.data?.mistakes ?? 0) + (record.attemptHistory || []).reduce((sum, attempt) => sum + (attempt.mistakes || 0), 0),
     hintsUsed: (record.hintsUsed || 0) + (record.attemptHistory || []).reduce((sum, attempt) => sum + (attempt.hintsUsed || 0), 0),
+    // Device/model failures (e.g. TensorFlow.js not loading). Reported, never scored.
+    systemErrors: (record.data?.systemErrors || 0) + (record.attemptHistory || []).reduce((sum, attempt) => sum + (attempt.data?.systemErrors || 0), 0),
     interactions: record.events?.filter(event => event.type === 'interact').length || 0,
     evidenceCount: record.evidence?.length || 0,
     evidenceReady: record.status === 'complete' && Boolean(record.evidence?.length),
@@ -38,6 +40,7 @@ export function buildEvidenceReport(records) {
       attempts: activities.reduce((sum, item) => sum + item.attempts, 0),
       mistakes: activities.reduce((sum, item) => sum + item.mistakes, 0),
       hintsUsed: activities.reduce((sum, item) => sum + item.hintsUsed, 0),
+      systemErrors: activities.reduce((sum, item) => sum + item.systemErrors, 0),
       commonErrors
     },
     activities
@@ -45,7 +48,7 @@ export function buildEvidenceReport(records) {
 }
 
 export function reportToCsv(report) {
-  const header = ['sessionId','learnerOrGroupId','attemptId','activityId','status','evidenceReady','teacherObserved','teacherReviewed','modeling','testing','explanation','responsibility','teacherNote','score','attempts','mistakes','hintsUsed','interactions','lastUpdated','teacherPartiallyReviewed']
+  const header = ['sessionId','learnerOrGroupId','attemptId','activityId','status','evidenceReady','teacherObserved','teacherReviewed','modeling','testing','explanation','responsibility','teacherNote','score','attempts','mistakes','hintsUsed','systemErrors','interactions','lastUpdated','teacherPartiallyReviewed']
   const escape = value => `"${String(value ?? '').replaceAll('"','""')}"`
   return [header.join(','), ...report.activities.map(item => header.map(key => escape({
     ...item,

@@ -62,8 +62,12 @@ export function useActivitySession(activity, engine, onComplete) {
   }, [ready, state])
 
   useEffect(() => {
-    if (state.status !== 'complete' || completionRef.current === state.events.length) return
-    completionRef.current = state.events.length
+    // Key on the attempt, not on events.length: any later event (a hint, a snapshot)
+    // changes the length and would replay the completion for the same attempt.
+    if (state.status !== 'complete') return
+    const completionKey = `${state.attemptId}:${state.score}`
+    if (completionRef.current === completionKey) return
+    completionRef.current = completionKey
     onComplete?.(state.score)
   }, [onComplete, state])
 

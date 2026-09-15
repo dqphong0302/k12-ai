@@ -279,3 +279,27 @@ test('project canvas cần thao tác review mới hoàn thành phiên', () => {
   state=projectLabEngine.reduce(state,{type:'review'})
   assert.equal(projectLabEngine.isComplete(state),true)
 })
+
+test('lỗi tải mô hình là lỗi thiết bị, không trừ sao của học sinh', () => {
+  let ml = mlLabEngine.initialState()
+  for (let index = 0; index < 3; index += 1) ml = mlLabEngine.reduce(ml, { type: 'train-error' })
+  assert.equal(ml.mistakes, 0)
+  assert.equal(ml.systemErrors, 3)
+
+  let data = dataLabEngine.initialState()
+  data = dataLabEngine.reduce(data, { type: 'clean' })
+  data = dataLabEngine.reduce(data, { type: 'analyze' })
+  data = dataLabEngine.reduce(data, { type: 'train-start', runId: 'r1' })
+  data = dataLabEngine.reduce(data, { type: 'train-error', runId: 'r1' })
+  assert.equal(data.mistakes, 0)
+  assert.equal(data.systemErrors, 1)
+})
+
+test('huấn luyện lại xóa lỗi dự đoán của mô hình cũ', () => {
+  let state = { ...mlLabEngine.initialState(), status: 'trained' }
+  state = mlLabEngine.reduce(state, { type: 'predict', sampleId: 'sick', prediction: { label: 'healthy', expected: 'sick' } })
+  assert.equal(state.mistakes, 1)
+  // Sửa dữ liệu rồi huấn luyện lại là đúng quy trình lab; điểm phải theo mô hình hiện tại.
+  state = mlLabEngine.reduce(state, { type: 'train-start' })
+  assert.equal(state.mistakes, 0)
+})

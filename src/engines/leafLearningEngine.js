@@ -1,4 +1,4 @@
-import { defineGameEngine } from '../runtime/activityRuntime.js'
+import { defineGameEngine, scoreForMistakes } from '../runtime/activityRuntime.js'
 
 export const leafTrainingSamples=[
   {id:'leaf-1',greenness:.90,spots:.08,label:'healthy'},
@@ -13,7 +13,7 @@ const signature=dataset=>dataset.map(sample=>`${sample.id}:${sample.label}`).joi
 export const hasLeafComparison=state=>state.runs.length>=2&&new Set(state.runs.map(run=>run.datasetSignature)).size>=2
 
 export const leafLearningEngine=defineGameEngine({
-  initialState:()=>({dataset:structuredClone(leafTrainingSamples),status:'idle',runId:null,current:null,runs:[],reflection:'',mistakes:0,completed:false}),
+  initialState:()=>({dataset:structuredClone(leafTrainingSamples),status:'idle',runId:null,current:null,runs:[],reflection:'',mistakes:0,systemErrors:0,completed:false}),
   hydrate(state){
     const initial=this.initialState()
     if(!state||!Array.isArray(state.dataset)||!Array.isArray(state.runs))return initial
@@ -31,9 +31,9 @@ export const leafLearningEngine=defineGameEngine({
       const run={runId:action.runId,datasetSignature:signature(state.dataset),dataset:structuredClone(state.dataset),predictions:structuredClone(action.result.predictions),config:structuredClone(action.result.config)}
       return {...state,status:'trained',current:run,runs:[...state.runs,run],runId:null}
     }
-    if(action.type==='train-error'&&action.runId===state.runId)return {...state,status:'error',runId:null,mistakes:state.mistakes+1}
+    if(action.type==='train-error'&&action.runId===state.runId)return {...state,status:'error',runId:null,systemErrors:(state.systemErrors||0)+1}
     if(action.type==='reflection')return {...state,reflection:String(action.value||'').slice(0,300),completed:false,score:null}
-    if(action.type==='finish'&&hasLeafComparison(state)&&state.reflection.trim().length>=15)return {...state,completed:true,score:Math.max(1,3-state.mistakes)}
+    if(action.type==='finish'&&hasLeafComparison(state)&&state.reflection.trim().length>=15)return {...state,completed:true,score:scoreForMistakes(state.mistakes)}
     return state
   },
   isComplete:state=>state.completed,

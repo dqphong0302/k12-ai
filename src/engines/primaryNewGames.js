@@ -1,6 +1,8 @@
+import { defineGameEngine } from '../runtime/activityRuntime.js'
+
 const initial = () => ({ step: 0, selected: [], mistakes: 0, lastCorrect: null })
 
-export const primaryNewGameEngine = {
+export const primaryNewGameEngine = defineGameEngine({
   initialState: initial,
   reduce(state, action, game) {
     if (action.type !== 'choose' || state.step >= game.rounds.length) return state
@@ -20,5 +22,6 @@ export const primaryNewGameEngine = {
     if (state.lastCorrect === false) return game.rounds[Math.min(state.step, game.rounds.length - 1)].wrong
     if (state.lastCorrect === true) return state.step >= game.rounds.length ? 'Đúng rồi! Em đã hoàn thành tất cả lượt chơi.' : 'Đúng rồi! Tiếp tục lượt tiếp theo nhé.'
     return ''
-  }
-}
+  },
+  serialize: state => structuredClone(state)
+})

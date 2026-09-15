@@ -1,4 +1,4 @@
-import { defineGameEngine } from '../runtime/activityRuntime.js'
+import { defineGameEngine, scoreForMistakes } from '../runtime/activityRuntime.js'
 
 export const primaryPipelineStages=[
   {id:'problem',label:'Xác định vấn đề'},
@@ -47,7 +47,7 @@ export const primaryPipelineEngine=defineGameEngine({
     const pipelineVersions=new Set(state.runs.map(run=>run.pipelineSignature)).size
     const datasetVersions=new Set(state.runs.map(run=>run.datasetSignature)).size
     const latest=state.runs.at(-1)?.result
-    if(action.type==='finish'&&state.runs.length>=2&&pipelineVersions>=2&&datasetVersions>=2&&latest?.complete&&latest.covered===3&&state.reflection.trim().length>=15)return {...state,completed:true,score:Math.max(1,3-state.mistakes)}
+    if(action.type==='finish'&&state.runs.length>=2&&pipelineVersions>=2&&datasetVersions>=2&&latest?.complete&&latest.covered===3&&state.reflection.trim().length>=15)return {...state,completed:true,score:scoreForMistakes(state.mistakes)}
     return state
   },
   isComplete:state=>state.completed,

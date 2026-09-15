@@ -55,3 +55,34 @@ test('retry giữ minh chứng ba lượt nhưng bắt đầu lại điểm và 
   assert.equal(state.evidence.length,3)
   assert.equal(state.events.filter(event=>event.type==='retry').length,2)
 })
+
+test('điểm sao chỉ có một công thức cho cả hiển thị và trao thưởng', () => {
+  // Bảng chuẩn: mọi nơi hiển thị hoặc trao sao đều phải đi qua hàm này.
+  assert.deepEqual([0, 1, 2, 3, 4].map(scoreForMistakes), [3, 2, 2, 1, 1])
+})
+
+test('chơi lại giữ minh chứng và lịch sử lượt trước', () => {
+  const lesson = { id: 'replay-activity', version: 1 }
+  let state = activityReducer(createActivityState(lesson, {}), { type: 'start' })
+  state = activityReducer(state, { type: 'interact', correct: true, evidence: { kind: 'identified-sensor' } })
+  state = activityReducer(state, { type: 'complete', score: 3, evidence: { kind: 'activity-complete', data: {} } })
+  const replayed = activityReducer(state, { type: 'retry', data: {} })
+  assert.equal(replayed.evidence.length, 2)
+  assert.equal(replayed.attemptHistory.length, 1)
+  assert.equal(replayed.attemptHistory[0].score, 3)
+  assert.equal(replayed.attempts, 2)
+  assert.equal(replayed.mistakes, 0)
+})
+
+test('khóa hoàn thành theo lượt nên gợi ý sau khi xong không trao sao lại', () => {
+  const lesson = { id: 'completion-key', version: 1 }
+  let state = activityReducer(createActivityState(lesson, {}), { type: 'start' })
+  state = activityReducer(state, { type: 'complete', score: 3 })
+  const key = value => `${value.attemptId}:${value.score}`
+  const first = key(state)
+  state = activityReducer(state, { type: 'hint' })
+  assert.equal(key(state), first, 'gợi ý sau khi hoàn thành không được đổi khóa')
+  state = activityReducer(state, { type: 'retry', data: {} })
+  state = activityReducer(state, { type: 'complete', score: 2 })
+  assert.notEqual(key(state), first, 'lượt mới phải có khóa mới')
+})
