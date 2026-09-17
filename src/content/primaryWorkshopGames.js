@@ -1,7 +1,7 @@
 export const workshopGames = {
   'grade-5-human-responsibility': {
     mechanic:'incident-control',mechanicLabel:'ĐIỀU PHỐI XỬ LÝ SỰ CỐ',
-    description:'Điều phối các vai trò khi hệ thống gợi ý sách bỏ sót sách chữ lớn; thay đổi trạng thái và chỉ mở lại sau khi kiểm tra.',
+    
     instruction:'Thư viện phát hiện máy không gợi ý sách chữ lớn cho bạn cần đọc chữ lớn. Em điều phối nhóm xử lý. Thông báo và tìm nguyên nhân có thể làm theo hai thứ tự khác nhau; không mở lại khi chưa có kiểm thử và duyệt của người phụ trách.',
     operations:[
       {id:'pause',label:'Thủ thư: tạm dừng gợi ý tự động'},
@@ -17,7 +17,7 @@ export const workshopGames = {
   },
   'grade-3-ai-study': {
     mechanic:'solution-builder',mechanicLabel:'TỰ GIẢI & ĐỐI CHIẾU AI',
-    description:'Tự dựng phép tính từ câu chuyện, nhập kết quả, dùng bằng chứng tính toán để giữ hoặc sửa lời AI.',
+    
     instruction:'Tự làm ba bài trước khi tin lời AI. Nhập phép tính gồm hai số và một dấu +, -, × hoặc ÷, rồi nhập kết quả em tính. Kiểm tra cả ba bài và sửa nếu cần.',
     problems:[
       {id:'books',story:'Có 7 kệ, mỗi kệ 8 cuốn sách. Tất cả có bao nhiêu cuốn?',a:7,b:8,op:'*',answer:56,ai:54,hint:'Có nhiều nhóm bằng nhau. Em có thể cộng 8 bảy lần trên giấy rồi viết phép nhân.'},
@@ -29,7 +29,7 @@ export const workshopGames = {
   },
   'grade-4-ai-jobs': {
     mechanic:'service-network',mechanicLabel:'NỐI MẠNG DỊCH VỤ',
-    description:'Nối sáu nhu cầu với công cụ phù hợp, chạy thử cả mạng và sửa những đường nối gây kết quả vô ích.',
+    
     instruction:'Mỗi nơi gửi một loại dữ liệu và cần một kết quả khác nhau. Nối công cụ cho cả sáu nơi rồi chạy kiểm tra; đọc lỗi đầu vào và kết quả để sửa đường nối.',
     labels:['Nhận dạng chữ','Nhận dạng tiếng nói','Phân tích ảnh cây','Gợi ý lộ trình','Đọc văn bản thành tiếng','Dịch văn bản'],
     samples:[
@@ -45,7 +45,7 @@ export const workshopGames = {
   },
   'grade-4-human-control': {
     mechanic:'robot-control',mechanicLabel:'DỪNG ROBOT & ĐỔI LỘ TRÌNH',
-    description:'Cho robot chạy từng bước, phát hiện đường gợi ý có vật cản rồi dừng, quan sát và tự điều hướng tới đích.',
+    
     instruction:'Máy gợi ý đi thẳng sang phải tới cờ. Chạy một bước để quan sát. Khi đường có thay đổi, em phải dừng, kiểm tra rồi điều khiển đường vòng.',
     columns:4,rows:3,start:[0,0],goal:[3,0],obstacle:[2,0],
     reflectionPrompt:'Gợi ý đi thẳng gặp vấn đề gì? Em đã dừng ở đâu, kiểm tra điều gì và chọn đường vòng thế nào?',
@@ -53,7 +53,7 @@ export const workshopGames = {
   },
   'grade-4-data-collector': {
     mechanic:'sampling-budget',mechanicLabel:'KHẢO SÁT TRONG NGÂN SÁCH',
-    description:'Chọn điểm lấy mẫu trên bản đồ vườn, cân đối chi phí và phát hiện các bối cảnh còn thiếu.',
+    
     instruction:'Em có 8 vé khảo sát. Chọn điểm để thu được ít nhất 2 ảnh cho mỗi nhóm: lá khỏe/lá đốm ở nắng/râm. Chạy kiểm kê, xem phần thiếu rồi sửa kế hoạch.',
     budget:8,
     groups:['Khỏe · nắng','Đốm · nắng','Khỏe · râm','Đốm · râm'],
@@ -70,7 +70,7 @@ export const workshopGames = {
   },
   'grade-3-if-then': {
     mechanic:'rule-lab', mechanicLabel:'VIẾT LUẬT & CHẠY THỬ',
-    description:'Lắp điều kiện tưới cây, chạy trên sáu ca đất/nước và sửa luật sau khi thấy ca sai.',
+    
     instruction:'Sáu ca thử đã có kết quả đúng mà robot cần đạt. Hãy lắp thử một luật, chạy cả sáu ca, đọc ca nào còn sai rồi đổi điều kiện hoặc toán tử cho tới khi đúng cả sáu.',
     fields:[{id:'dry',label:'Đất khô'},{id:'water',label:'Bồn còn nước'},{id:'sun',label:'Trời nắng'}],
     samples:[
@@ -87,7 +87,7 @@ export const workshopGames = {
   },
   'grade-5-rule-tree': {
     mechanic:'rule-lab',mechanicLabel:'LẬP TRÌNH ĐIỀU KIỆN',
-    description:'Kết hợp điều kiện, toán tử VÀ/HOẶC rồi kiểm thử bộ phân loại giấy tái chế bằng ca phản ví dụ.',
+    
     instruction:'Sáu vật đã có nhánh đúng mà máy cần chọn. Lắp thử một luật, chạy kiểm thử, xem vật nào đi sai nhánh rồi sửa điều kiện hoặc toán tử cho tới khi cả sáu đều đúng.',
     fields:[{id:'paper',label:'Vật bằng giấy'},{id:'clean',label:'Vật sạch'},{id:'white',label:'Vật màu trắng'}],
     samples:[
@@ -103,7 +103,7 @@ export const workshopGames = {
   },
   'grade-3-clean-data': {
     mechanic:'data-repair',mechanicLabel:'SỬA BẢNG DỮ LIỆU',
-    description:'Chỉnh nhãn trực tiếp, loại thẻ không đọc được; chạy máy gần nhất trước/sau và so sánh trên mẫu mới.',
+    
     instruction:'Máy tìm mẫu có đặc trưng gần nhất. Sửa các nhãn sai và loại ảnh không đủ thông tin; giữ lại ví dụ đúng.',
     labels:['Táo','Chuối'],
     samples:[
@@ -120,7 +120,7 @@ export const workshopGames = {
   },
   'grade-4-model-test': {
     mechanic:'experiment',mechanicLabel:'THÍ NGHIỆM CÓ KIỂM SOÁT',
-    description:'Thay ánh sáng, tiếng ồn hoặc bộ mô hình; tự thiết kế cặp thử chỉ đổi một biến và đọc kết quả từng mẫu.',
+    
     instruction:'Tìm ảnh hưởng của ánh sáng: giữ mô hình và tiếng ồn, chỉ đổi sáng/tối rồi chạy. Không suy nguyên nhân từ hai lượt đổi nhiều yếu tố.',
     variables:[{id:'light',label:'Ánh sáng',values:['Sáng','Tối']},{id:'noise',label:'Tiếng ồn',values:['Yên tĩnh','Ồn']},{id:'model',label:'Mô hình',values:['A','B']}],
     target:'light',
@@ -129,7 +129,7 @@ export const workshopGames = {
   },
   'grade-5-explain-ai': {
     mechanic:'counterfactual',mechanicLabel:'ĐIỀU TRA NGUYÊN NHÂN',
-    description:'Giữ nguyên lá, đổi riêng nền để phát hiện máy bám nền; thử đổi đốm để đối chiếu và chọn căn cứ từ nhật ký.',
+    
     instruction:'Máy bí ẩn có thể nhìn nhầm màu nền thành dấu bệnh. Thiết kế hai cặp thử: chỉ đổi nền và chỉ đổi đốm lá.',
     variables:[{id:'background',label:'Màu nền',values:['Xanh','Vàng']},{id:'spots',label:'Đốm lá',values:['Không đốm','Có đốm']},{id:'leaf',label:'Mẫu lá',values:['Lá A','Lá B']}],
     target:'background',
@@ -138,7 +138,7 @@ export const workshopGames = {
   },
   'grade-5-new-data': {
     mechanic:'dataset-split',mechanicLabel:'CHIA TẬP & CHẶN RÒ RỈ',
-    description:'Chuyển thẻ giữa tập học, tập thử và loại; phát hiện ảnh trùng gốc rồi kiểm toán độ độc lập của phép thử.',
+    
     instruction:'Tạo tập học và thử đều có lá khỏe/lá đốm. Mỗi tập ít nhất hai mẫu; cùng ảnh gốc không được xuất hiện ở cả hai tập.',
     samples:[
       {id:'a',label:'Lá khỏe — ảnh gốc A',origin:'A',group:'Khỏe'},

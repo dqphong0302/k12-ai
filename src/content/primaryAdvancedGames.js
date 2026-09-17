@@ -1,7 +1,9 @@
 // Each challenge has its own situations, evidence and explanation; choices rotate
 // deterministically so the first button is not always the answer.
-import { workshopGames } from './primaryWorkshopGames.js'
-const workshop = (id,title,ministry) => ({id,title,ministry,type:'workshop',version:4,icon:'🛠️',image:`/images/${id}.webp`,aiApp:'Mô phỏng giáo dục cục bộ · không gửi dữ liệu',...workshopGames[id]})
+import { workshopSummaries } from './primaryWorkshopSummaries.js'
+// Chỉ phần hiển thị trên thẻ nằm trong app shell; dữ liệu cơ chế của xưởng
+// (thao tác, mẫu, phép thử) do PrimaryWorkshop nạp cùng chunk lazy của nó.
+const workshop = (id,title,ministry) => ({id,title,ministry,type:'workshop',version:4,icon:'🛠️',image:`/images/${id}.webp`,aiApp:'Mô phỏng giáo dục cục bộ · không gửi dữ liệu',description:workshopSummaries[id]})
 const round = (prompt, answer, distractors, explanation, skill='VẬN DỤNG') => ({prompt,options:[answer,...distractors],correct:0,explanation,skill})
 const quest = (id,title,ministry,rounds) => ({id,type:'challenge',title,ministry,icon:'🧭',description:`${title}: ${rounds.length} tình huống về ${rounds.map(r=>r.skill.toLowerCase()).join(", ")}.`,aiApp:'Tình huống mô phỏng · con người kiểm tra và quyết định',image:`/images/${id}.webp`,rounds:rounds.map((r,i)=>{const shift=(i+1)%r.options.length;return {...r,options:[...r.options.slice(shift),...r.options.slice(0,shift)],correct:(r.options.length-shift)%r.options.length}})})
 const sort = (id,title,ministry,groups,items) => ({id,title,ministry,type:'sorting',icon:'🧺',description:`${title}: phân biệt ${groups.join(' và ')} qua ${items.length} thẻ dữ liệu.`,aiApp:'Mô phỏng phân loại dữ liệu theo tiêu chí',image:`/images/${id}.webp`,groups,items:items.map(([label,group,aiWrong])=>({label,group,icon:'🔎',...(aiWrong?{aiWrong:true}:{})}))})

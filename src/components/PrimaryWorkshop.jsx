@@ -2,9 +2,12 @@ import React from 'react'
 import { X, Play, RotateCcw, Check } from 'lucide-react'
 import { useActivitySession } from '../runtime/useActivitySession.js'
 import { primaryWorkshopEngine,workshopReady,robotPosition,assignmentChoices,incidentStatus,describeConfig } from '../engines/primaryWorkshopEngine.js'
+import { workshopGames } from '../content/primaryWorkshopGames.js'
 import './PrimaryWorkshop.css'
 
-export default function PrimaryWorkshop({game,close,onComplete}) {
+export default function PrimaryWorkshop({game:card,close,onComplete}) {
+  // Thẻ trò chơi trong app shell chỉ mang phần hiển thị; dữ liệu cơ chế đi kèm chunk này.
+  const game=React.useMemo(()=>({...card,...workshopGames[card.id]}),[card])
   const session=useActivitySession(game,primaryWorkshopEngine,onComplete)
   const {data,act}=session
   const select=(key,label,values)=><label key={key}>{label}<select id={`workshop-${key}`} value={data.config[key]} onChange={e=>act({type:'configure',key,value:e.target.value})}>{values.map(v=><option key={v.id||v} value={v.id||v}>{v.label||v}</option>)}</select></label>

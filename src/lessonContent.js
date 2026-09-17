@@ -16,59 +16,6 @@ export const strands = [
   { short: 'B', code: 'NLb', name: 'Đạo đức & an toàn', range: 'Tiết 10–12', icon: '♢', color: '#217a4c' }
 ]
 
-export const gradeGames = {
-  1: [
-    { id: 'emotion-detective', type: 'choice', icon: '🕵️', title: 'Thám tử cảm xúc', description: 'Quan sát tình huống và chọn cách một người bạn tốt sẽ làm.', rounds: [
-      { prompt: 'Mai ngồi một mình và trông rất buồn. Em nên làm gì?', options: ['Hỏi thăm và lắng nghe bạn', 'Bảo máy tự lo', 'Bỏ đi thật nhanh'], correct: 0, explanation: 'Con người biết quan tâm và lắng nghe cảm xúc thật của nhau.' },
-      { prompt: 'Bo-Bo hiện khuôn mặt cười trên màn hình. Điều nào đúng?', options: ['Bo-Bo đang vui thật', 'Bo-Bo hiển thị theo thiết kế', 'Bo-Bo cần được dỗ dành'], correct: 1, explanation: 'Máy có thể biểu cảm, nhưng không có cảm xúc thật như con người.' },
-      { prompt: 'Một bạn ngã ở sân trường. Ai cần quyết định giúp bạn?', options: ['Con người ở gần bạn', 'Chiếc máy tính', 'Một hình dán cảm xúc'], correct: 0, explanation: 'Con người quan sát hoàn cảnh, giúp đỡ và chịu trách nhiệm.' }
-    ]},
-    { id: 'human-or-machine', type: 'sort', icon: '🤖', title: 'Người hay máy?', description: 'Phân loại điều con người làm và việc máy có thể hỗ trợ.', categories: ['Con người', 'Máy hỗ trợ'], items: [
-      { text: 'Yêu thương và an ủi bạn', correct: 0 }, { text: 'Sắp xếp nhiều ảnh thật nhanh', correct: 1 }, { text: 'Chịu trách nhiệm khi quyết định', correct: 0 }, { text: 'Phát nhạc theo nút bấm', correct: 1 }, { text: 'Hiểu hoàn cảnh của một người bạn', correct: 0 }, { text: 'Đếm đồ vật trong ảnh', correct: 1 }
-    ]}
-  ],
-  2: [
-    { id: 'ai-captain', type: 'choice', icon: '🧭', title: 'Đội trưởng AI', description: 'Chọn lúc nên dùng AI và luôn giữ quyền kiểm soát.', rounds: [
-      { prompt: 'AI gợi ý một món ăn có thứ em bị dị ứng. Em làm gì?', options: ['Ăn ngay', 'Hỏi người lớn và kiểm tra', 'Tin vì AI rất nhanh'], correct: 1, explanation: 'AI chỉ gợi ý; con người cần kiểm tra và quyết định an toàn.' },
-      { prompt: 'Robot hút bụi sắp đi vào chỗ có nước. Em nên làm gì?', options: ['Dừng máy và báo người lớn', 'Mặc kệ máy', 'Đổ thêm nước'], correct: 0, explanation: 'Người dùng phải quan sát và kiểm soát thiết bị.' },
-      { prompt: 'AI phân loại nhầm quả cam thành quả bóng. Cách tốt nhất là gì?', options: ['Nói máy luôn đúng', 'Kiểm tra và cho thêm ví dụ', 'Xóa mọi bức ảnh'], correct: 1, explanation: 'Ví dụ phù hợp giúp máy học và phân loại tốt hơn.' }
-    ]},
-    { id: 'right-data-basket', type: 'sort', icon: '🧺', title: 'Giỏ dữ liệu đúng', description: 'Chọn dữ liệu hữu ích và loại dữ liệu không phù hợp.', categories: ['Nên dùng', 'Không nên dùng'], items: [
-      { text: 'Ảnh rõ của nhiều loại lá', correct: 0 }, { text: 'Ảnh bị che kín hoàn toàn', correct: 1 }, { text: 'Ví dụ được đặt đúng tên', correct: 0 }, { text: 'Ảnh mèo để dạy nhận biết quả', correct: 1 }, { text: 'Nhiều góc chụp khác nhau', correct: 0 }, { text: 'Ví dụ bị đặt sai nhóm', correct: 1 }
-    ]}
-  ],
-  3: [
-    { id: 'speedy-fact-check', type: 'choice', icon: '🔎', title: 'Kiểm chứng siêu tốc', description: 'Tìm cách kiểm tra câu trả lời AI trước khi sử dụng.', rounds: [
-      { prompt: 'AI nói ngày mai trường được nghỉ nhưng không có nguồn. Em làm gì?', options: ['Báo cả lớp ngay', 'Xem thông báo chính thức', 'Tin ngay lập tức'], correct: 1, explanation: 'Thông báo chính thức từ nhà trường là nguồn phù hợp để kiểm tra.' },
-      { prompt: 'Hai trang web ghi hai con số khác nhau. Em nên làm gì?', options: ['Chọn số lớn hơn', 'Đối chiếu nguồn đáng tin cậy', 'Đoán một số'], correct: 1, explanation: 'Đối chiếu nhiều nguồn đáng tin giúp phát hiện thông tin sai.' },
-      { prompt: 'AI giải bài khác với cách cô giáo dạy. Bước đầu tiên là gì?', options: ['Chép luôn', 'Tự làm và hỏi lại cô', 'Xóa bài'], correct: 1, explanation: 'Em cần tự suy nghĩ, kiểm tra từng bước và hỏi người có chuyên môn.' }
-    ]},
-    { id: 'true-or-check', type: 'sort', icon: '📰', title: 'Thật hay cần kiểm tra?', description: 'Phân loại thông tin có căn cứ và thông tin cần xác minh.', categories: ['Có căn cứ', 'Cần kiểm tra'], items: [
-      { text: 'Thông báo trên website chính thức của trường', correct: 0 }, { text: 'Tin nhắn lạ không ghi nguồn', correct: 1 }, { text: 'Thông tin trong sách giáo khoa đang học', correct: 0 }, { text: 'Ảnh giật gân do tài khoản lạ đăng', correct: 1 }, { text: 'Lời cô giáo xác nhận trong lớp', correct: 0 }, { text: 'Câu trả lời AI không kèm bằng chứng', correct: 1 }
-    ]}
-  ],
-  4: [
-    { id: 'ai-senses', type: 'choice', icon: '👁️', title: 'Mắt – tai của AI', description: 'Nhận biết dữ liệu đầu vào và nguyên nhân AI có thể đoán sai.', rounds: [
-      { prompt: 'Camera bị che khi AI nhận diện cây. Điều gì dễ xảy ra?', options: ['AI đoán sai', 'AI nghe rõ hơn', 'Cây đổi tên'], correct: 0, explanation: 'Hình ảnh đầu vào không rõ khiến kết quả nhận diện kém chính xác.' },
-      { prompt: 'Phòng rất ồn khi AI nghe giọng nói. Em nên làm gì?', options: ['Nói xa micro hơn', 'Giảm tiếng ồn và nói rõ', 'Che micro lại'], correct: 1, explanation: 'Âm thanh rõ và ít nhiễu giúp AI nhận dữ liệu tốt hơn.' },
-      { prompt: 'AI chưa từng thấy một loại quả mới. Kết quả có thể thế nào?', options: ['Luôn đúng', 'Có thể đoán sai', 'AI tự nếm quả'], correct: 1, explanation: 'AI dễ sai với trường hợp khác dữ liệu nó đã học.' }
-    ]},
-    { id: 'privacy-knight', type: 'sort', icon: '🛡️', title: 'Hiệp sĩ thông tin', description: 'Bảo vệ dữ liệu cá nhân khi học và vui chơi trên mạng.', categories: ['Có thể chia sẻ', 'Cần giữ kín'], items: [
-      { text: 'Màu em yêu thích', correct: 0 }, { text: 'Mật khẩu tài khoản', correct: 1 }, { text: 'Môn học em thích', correct: 0 }, { text: 'Địa chỉ nhà riêng', correct: 1 }, { text: 'Tên một cuốn sách hay', correct: 0 }, { text: 'Số điện thoại gia đình', correct: 1 }
-    ]}
-  ],
-  5: [
-    { id: 'ai-training-workshop', type: 'choice', icon: '🧪', title: 'Xưởng huấn luyện AI', description: 'Đi qua đúng các bước để tạo một mô hình đáng tin cậy.', rounds: [
-      { prompt: 'Trước khi thu thập dữ liệu, nhóm cần làm gì?', options: ['Xác định vấn đề rõ ràng', 'Bấm huấn luyện ngay', 'Chọn kết quả đẹp nhất'], correct: 0, explanation: 'Một hệ thống tốt bắt đầu từ vấn đề và mục tiêu cụ thể.' },
-      { prompt: 'Sau khi huấn luyện, nên kiểm tra bằng dữ liệu nào?', options: ['Chỉ dữ liệu đã học', 'Dữ liệu mới chưa từng thấy', 'Không cần kiểm tra'], correct: 1, explanation: 'Dữ liệu mới cho biết mô hình có thực sự học được hay chỉ ghi nhớ.' },
-      { prompt: 'Mô hình sai nhiều với ảnh tối. Nhóm nên làm gì?', options: ['Giấu lỗi', 'Bổ sung ảnh tối phù hợp rồi thử lại', 'Dùng kết quả luôn'], correct: 1, explanation: 'Tìm lỗi, bổ sung dữ liệu và thử lại là vòng lặp cải tiến AI.' }
-    ]},
-    { id: 'balanced-data', type: 'sort', icon: '⚖️', title: 'Cân bằng dữ liệu', description: 'Nhận ra bộ dữ liệu giúp AI hoạt động công bằng hơn.', categories: ['Giúp công bằng', 'Dễ gây thiên lệch'], items: [
-      { text: 'Ví dụ từ nhiều nhóm người dùng', correct: 0 }, { text: 'Chỉ thu thập một nhóm duy nhất', correct: 1 }, { text: 'Kiểm tra kết quả với nhiều trường hợp', correct: 0 }, { text: 'Bỏ qua nhóm máy hay đoán sai', correct: 1 }, { text: 'Sửa nhãn dữ liệu bị nhầm', correct: 0 }, { text: 'Chọn dữ liệu chỉ để kết quả đẹp', correct: 1 }
-    ]}
-  ]
-}
-
 const strandMeta = {
   NLa: { name: 'Con người là trung tâm', icon: '♥', color: '#a8462f' },
   NLc: { name: 'Kỹ thuật & ứng dụng', icon: '◎', color: '#0876b9' },
@@ -88,8 +35,6 @@ export function getLessonContent({ grade, index, title }) {
   // thích của bài trắc nghiệm sẽ lộ đáp án slide 4 ngay từ slide 1.
   const reflection = primaryLessonReflections[grade]?.[index]
   if (!reflection) throw new Error(`Thiếu ghi nhớ/câu hỏi mở lớp ${grade}, tiết ${index+1}`)
-  // The strand comes from the ministry code of the lesson, not from its position in the block:
-  // a few lessons (e.g. lớp 2 tiết 6, lớp 4 tiết 11) sit outside the usual 3-3-3-3 grouping.
   // The strand comes from the ministry code of the lesson, not from its position in the block:
   // a few lessons (e.g. lớp 2 tiết 6, lớp 4 tiết 11) sit outside the usual 3-3-3-3 grouping.
   const strand = strands.find(item=>item.short===detail.standards.split('.')[1][0])

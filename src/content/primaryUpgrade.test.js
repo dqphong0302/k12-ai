@@ -4,10 +4,13 @@ import {readFileSync,existsSync} from 'node:fs'
 import {primaryActivities} from './primaryActivities.js'
 import {primaryLessons} from './primaryLessonActivities.js'
 import {primaryAdvancedGames} from './primaryAdvancedGames.js'
-import {getGameEngine} from '../engines/index.js'
-import {primaryWorkshopEngine as workshop,workshopReady} from '../engines/primaryWorkshopEngine.js'
 import {primaryLessonDetails,primaryLessonExtraGames} from './primaryLessonDetails.js'
 import {primaryLessonReflections} from './primaryLessonReflections.js'
+import {workshopGames} from './primaryWorkshopGames.js'
+// Thẻ xưởng trong app shell chỉ có phần hiển thị; PrimaryWorkshop ghép dữ liệu cơ chế khi mở.
+const withMechanic=game=>({...game,...workshopGames[game.id]})
+import {getGameEngine} from '../engines/index.js'
+import {primaryWorkshopEngine as workshop,workshopReady} from '../engines/primaryWorkshopEngine.js'
 import {getLessonContent} from '../lessonContent.js'
 import {countDecisionPoints,scoreForMistakes} from '../runtime/activityRuntime.js'
 
@@ -62,7 +65,7 @@ test('tình huống đang sử dụng chặn sai, giữ lời giải, khôi ph�
 })
 
 test('các xưởng thực hành cần bằng chứng thực nghiệm và không dùng kết quả cũ',()=>{
-  const games=Object.values(primaryActivities).flat().filter(g=>g.type==='workshop')
+  const games=Object.values(primaryActivities).flat().filter(g=>g.type==='workshop').map(withMechanic)
   assert.equal(games.length,11)
   for(const game of games){
     assert.equal(game.rounds,undefined,`${game.id}: không giữ câu hỏi trắc nghiệm cũ`)
@@ -189,7 +192,7 @@ test('mỗi lượt chơi không có hai lựa chọn giống hệt nhau',()=>{
 test('lượt chạy so sánh bắt buộc không bị tính là lỗi, lặp lại thì có',()=>{
   // workshopReady đòi hai cấu hình khác nhau và lượt cuối phải đạt, nên với xưởng chỉ có
   // duy nhất một cấu hình đúng thì học sinh buộc phải chạy một lượt không đạt.
-  const game=Object.values(primaryActivities).flat().find(g=>g.id==='grade-3-clean-data')
+  const game=withMechanic(Object.values(primaryActivities).flat().find(g=>g.id==='grade-3-clean-data'))
   const target=Object.fromEntries(game.samples.map(s=>[s.id,s.usable?s.truth:'Loại']))
   const wrong={...target,[game.samples[0].id]:'Loại'===target[game.samples[0].id]?game.labels[0]:'Loại'}
   const play=configs=>{
