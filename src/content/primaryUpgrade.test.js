@@ -7,6 +7,7 @@ import {primaryAdvancedGames} from './primaryAdvancedGames.js'
 import {getGameEngine} from '../engines/index.js'
 import {primaryWorkshopEngine as workshop,workshopReady} from '../engines/primaryWorkshopEngine.js'
 import {primaryLessonDetails,primaryLessonExtraGames} from './primaryLessonDetails.js'
+import {primaryLessonReflections} from './primaryLessonReflections.js'
 import {getLessonContent} from '../lessonContent.js'
 import {countDecisionPoints,scoreForMistakes} from '../runtime/activityRuntime.js'
 
@@ -216,4 +217,39 @@ test('mọi trò của lớp đều mở được từ một tiết học',()=>{
     for(const id of linked)assert.ok(available.includes(id),`lớp ${grade} trỏ tới trò không có: ${id}`)
     for(const id of available)assert.ok(linked.has(id),`lớp ${grade}: trò ${id} không tiết nào mở được`)
   }
+})
+
+test('ghi nhớ và câu hỏi mở của tiết không lộ đáp án trắc nghiệm',()=>{
+  const prompts=new Set()
+  for(const [grade,lessons] of Object.entries(primaryLessonDetails)){
+    assert.equal(primaryLessonReflections[grade].length,12,`lớp ${grade} phải đủ 12 ghi nhớ`)
+    lessons.forEach((lesson,index)=>{
+      const {remember,think}=primaryLessonReflections[grade][index]
+      const where=`lớp ${grade} tiết ${index+1}`
+      for(const value of [remember,think])assert.ok(typeof value==='string'&&value.trim().length>20,`${where}: nội dung quá ngắn`)
+      assert.notEqual(remember,lesson.quiz.explanation,`${where}: ghi nhớ vẫn là lời giải thích đáp án`)
+      assert.ok(!think.includes(lesson.quiz.question),`${where}: câu hỏi mở vẫn là câu hỏi trắc nghiệm`)
+      // Ghi nhớ là chốt kiến thức của tiết, không được sao chép lời giải thích đáp án.
+      const normalise=value=>value.toLowerCase().replace(/[^\p{L}\p{N} ]/gu,'').trim()
+      assert.ok(!normalise(lesson.quiz.explanation).includes(normalise(remember)),`${where}: ghi nhớ nằm trong lời giải thích đáp án`)
+      assert.ok(!normalise(remember).includes(normalise(lesson.quiz.explanation)),`${where}: ghi nhớ chứa nguyên lời giải thích đáp án`)
+      assert.ok(!prompts.has(think),`${where}: câu hỏi mở bị trùng tiết khác`)
+      prompts.add(think)
+    })
+  }
+})
+
+test('mỗi tiết có ít nhất hai ý lý thuyết và câu không quá dài',()=>{
+  const sentences=text=>(text.match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[text]).map(item=>item.trim()).filter(Boolean)
+  const averages={}
+  for(const [grade,lessons] of Object.entries(primaryLessonDetails)){
+    lessons.forEach((lesson,index)=>{
+      const points=sentences(lesson.focus)
+      assert.ok(points.length>=2,`lớp ${grade} tiết ${index+1}: slide lý thuyết chỉ có ${points.length} ý`)
+      for(const point of points)assert.ok(point.split(/\s+/).length<=35,`lớp ${grade} tiết ${index+1}: có câu quá dài cho học sinh Tiểu học`)
+    })
+    averages[grade]=lessons.reduce((sum,lesson)=>sum+lesson.focus.length,0)/lessons.length
+  }
+  // Lớp trên học 35–40 phút với chuẩn khó hơn nên phần lý thuyết không được mỏng hơn lớp 1.
+  for(const grade of [4,5])assert.ok(averages[grade]>=averages[1],`lớp ${grade} có lý thuyết mỏng hơn lớp 1`)
 })

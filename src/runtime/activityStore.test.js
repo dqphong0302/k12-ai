@@ -15,7 +15,7 @@ test('bài học lưu artifact một lần trong đúng phiên và nhóm', async
   }})
   try {
     const activity={id:'primary-1-1',version:1,type:'lesson'}
-    const artifact={kind:'lesson-quiz',quizAnswer:1,quizCorrect:true}
+    const artifact={kind:'lesson-quiz',quizAnswer:1,quizCorrect:true,quizWrongAttempts:2,quizWrongOptions:['Máy vui giống hệt em','  '],quizFirstTry:false}
     const first=await recordLessonCompletion(activity,artifact)
     const second=await recordLessonCompletion(activity,artifact)
     assert.equal(first.status,'complete')
@@ -23,6 +23,9 @@ test('bài học lưu artifact một lần trong đúng phiên và nhóm', async
     assert.equal(first.learnerOrGroupId,'A')
     assert.deepEqual(first.evidence.map(item=>item.kind),['lesson-evidence','activity-complete'])
     assert.deepEqual(first.evidence[1].data,artifact)
+    // Các lần chọn sai trước khi trả lời đúng phải vào được báo cáo, chuỗi rỗng thì bỏ qua.
+    assert.equal(first.mistakes,1)
+    assert.deepEqual(first.events.filter(event=>event.correct===false).map(event=>event.target),['Máy vui giống hệt em'])
     assert.equal(second.evidence.length,2)
     await saveTeacherObservation(first.recordId,true)
     let observed=await loadActivityState(activity.id,{sessionId:'lesson-1',learnerOrGroupId:'A'})

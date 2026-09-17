@@ -1,4 +1,5 @@
 import { primaryLessonDetails, primaryLessonExtraGames } from './content/primaryLessonDetails.js'
+import { primaryLessonReflections } from './content/primaryLessonReflections.js'
 
 export const grades = [
   { id: 1, label: 'Lớp 1', age: '6–7 tuổi', color: '#a8462f', titles: ['Con người biết cảm xúc', 'Bo-Bo biểu cảm thế nào?', 'Nhận ra máy thông minh', 'Mắt của máy tính', 'Tai của máy tính', 'AI nhận biết quanh em', 'Máy học từ ví dụ', 'Nhiều loại máy thông minh', 'Em dạy Bo-Bo', 'Việc tốt, việc chưa tốt', 'Máy thông minh làm việc tốt', 'Em là công dân số nhí'] },
@@ -83,6 +84,12 @@ const theorySentences = text => {
 export function getLessonContent({ grade, index, title }) {
   const detail = primaryLessonDetails[grade]?.[index]
   if (!detail) throw new Error(`Thiếu nội dung lớp ${grade}, tiết ${index+1}`)
+  // Ô "Ghi nhớ" và thẻ "Em thử nghĩ" phải là nội dung riêng: lấy lại câu hỏi và lời giải
+  // thích của bài trắc nghiệm sẽ lộ đáp án slide 4 ngay từ slide 1.
+  const reflection = primaryLessonReflections[grade]?.[index]
+  if (!reflection) throw new Error(`Thiếu ghi nhớ/câu hỏi mở lớp ${grade}, tiết ${index+1}`)
+  // The strand comes from the ministry code of the lesson, not from its position in the block:
+  // a few lessons (e.g. lớp 2 tiết 6, lớp 4 tiết 11) sit outside the usual 3-3-3-3 grouping.
   // The strand comes from the ministry code of the lesson, not from its position in the block:
   // a few lessons (e.g. lớp 2 tiết 6, lớp 4 tiết 11) sit outside the usual 3-3-3-3 grouping.
   const strand = strands.find(item=>item.short===detail.standards.split('.')[1][0])
@@ -103,7 +110,7 @@ export function getLessonContent({ grade, index, title }) {
     explanation: detail.focus,
     theoryPoints: theorySentences(detail.focus),
     example: detail.example,
-    thinkQuestion: `${detail.quiz.question} Hãy nêu bằng chứng hoặc một ví dụ khác để giải thích.`,
+    thinkQuestion: reflection.think,
     mechanism: detail.quiz.explanation,
     limitation: 'kết luận cần dựa trên tình huống và bằng chứng, không chỉ lời khẳng định của máy',
     practice: detail.steps[2],
@@ -111,7 +118,7 @@ export function getLessonContent({ grade, index, title }) {
     quiz: detail.quiz,
     illustration: `/images/lessons/grade-${grade}-stage-${stage}.webp`,
     observe: strand.code === 'NLa' ? 'Trong hình, việc nào Bo-Bo có thể hỗ trợ và việc nào chỉ con người mới làm được?' : strand.code === 'NLc' ? 'Bo-Bo đang nhận dữ liệu gì? Điều gì có thể khiến máy nhận biết sai?' : strand.code === 'NLd' ? 'Em hãy chỉ ra dữ liệu, bước thử nghiệm và cách các bạn cải tiến giải pháp.' : 'Các bạn nhỏ đang bảo vệ bản thân và giúp hệ thống công bằng bằng cách nào?',
-    remember: detail.quiz.explanation
+    remember: reflection.remember
   }
 }
 

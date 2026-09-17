@@ -187,6 +187,11 @@ export async function recordLessonCompletion(activity, artifact) {
   if (saved?.version === activity.version && saved.status === 'complete') return saved
   let state = saved?.version === activity.version ? saved : { ...createActivityState(activity, {}), ...scope }
   if (state.status === 'idle') state = activityReducer(state,{type:'start'})
+  // Các phương án sai học sinh đã chọn trước khi trả lời đúng: đây là tín hiệu duy nhất cho
+  // giáo viên biết em làm đúng ngay hay phải thử lại, vì nút Hoàn thành chỉ mở khi đã đúng.
+  for (const option of (Array.isArray(artifact?.quizWrongOptions) ? artifact.quizWrongOptions : []).slice(0,12)) {
+    if (typeof option === 'string' && option.trim()) state = activityReducer(state,{type:'interact',correct:false,target:option})
+  }
   state = activityReducer(state,{type:'interact',correct:true,target:'lesson-assessment',data:artifact,evidence:{kind:'lesson-evidence',data:structuredClone(artifact)}})
   state = activityReducer(state,{type:'complete',score:3,evidence:{kind:'activity-complete',data:structuredClone(artifact)}})
   return saveActivityState(state)

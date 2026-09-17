@@ -798,6 +798,9 @@ function LessonModal({ lesson, done, onComplete, close, openGame }) {
   const stationIds = [content.gameId, ...content.extraGameIds]
   const stations = stationIds.map(id => interactiveGames[content.grade]?.find(item=>item.id===id)).filter(Boolean)
   const [answer, setAnswer] = useState(null)
+  // Nút Hoàn thành chỉ mở khi chọn đúng, nên nếu không đếm các lần chọn sai thì báo cáo
+  // giáo viên luôn thấy "đúng" và không phân biệt được đúng ngay lần đầu với thử nhiều lần.
+  const [wrongChoices, setWrongChoices] = useState([])
   const [finished, setFinished] = useState(done)
   const [slide, setSlide] = useState(0)
   const [unlocked, setUnlocked] = useState(0)
@@ -806,7 +809,7 @@ function LessonModal({ lesson, done, onComplete, close, openGame }) {
   const correct = answer === content.quiz.correct
   const finish = () => {
     playVictorySound(settings.audio)
-    onComplete({kind:'lesson-quiz',lessonNumber:content.lessonNumber,quizAnswer:answer,quizCorrect:correct,partsViewed:unlocked+1})
+    onComplete({kind:'lesson-quiz',lessonNumber:content.lessonNumber,quizAnswer:answer,quizCorrect:correct,partsViewed:unlocked+1,quizWrongAttempts:wrongChoices.length,quizWrongOptions:wrongChoices.map(index=>content.quiz.options[index]),quizFirstTry:wrongChoices.length===0})
     setFinished(true)
   }
   const slideMeta = [
@@ -839,6 +842,7 @@ function LessonModal({ lesson, done, onComplete, close, openGame }) {
       playCorrectSound(settings.audio)
     } else {
       playWrongSound(settings.audio)
+      setWrongChoices(list => [...list, i].slice(0, 12))
     }
   }
   const toggleSpeech = () => {
