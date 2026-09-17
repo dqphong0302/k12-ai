@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { activityReducer, createActivityState, defineGameEngine, scoreForMistakes } from './activityRuntime.js'
+import { activityReducer, countDecisionPoints, createActivityState, defineGameEngine, scoreForMistakes } from './activityRuntime.js'
 import { simulationEngine } from '../engines/simulationEngine.js'
 
 const activity = { id: 'test-simulation', version: 1, items: [{ label: 'Camera', target: true }, { label: 'Bóng' }] }
@@ -58,7 +58,18 @@ test('retry giữ minh chứng ba lượt nhưng bắt đầu lại điểm và 
 
 test('điểm sao chỉ có một công thức cho cả hiển thị và trao thưởng', () => {
   // Bảng chuẩn: mọi nơi hiển thị hoặc trao sao đều phải đi qua hàm này.
-  assert.deepEqual([0, 1, 2, 3, 4].map(scoreForMistakes), [3, 2, 2, 1, 1])
+  assert.deepEqual([0, 1, 2, 3, 4].map(mistakes => scoreForMistakes(mistakes)), [3, 2, 2, 1, 1])
+})
+
+test('ngưỡng hai sao nới theo số lượt quyết định của hoạt động', () => {
+  // 3 sai trên 14 thẻ không thể bị xếp cùng mức với 3 sai trên 4 lượt.
+  assert.deepEqual([0, 2, 4, 5].map(mistakes => scoreForMistakes(mistakes, 14)), [3, 2, 2, 1])
+  assert.deepEqual([0, 2, 3].map(mistakes => scoreForMistakes(mistakes, 4)), [3, 2, 1])
+  // Hoạt động ngắn giữ nguyên ngưỡng cũ dù có truyền số lượt.
+  assert.equal(scoreForMistakes(3, 6), 1)
+  assert.equal(countDecisionPoints({ items: [1, 2, 3] }), 3)
+  assert.equal(countDecisionPoints({ rounds: [{ correct: ['a', 'b'] }, { correct: 'c' }] }), 3)
+  assert.equal(countDecisionPoints(null), 0)
 })
 
 test('chơi lại giữ minh chứng và lịch sử lượt trước', () => {

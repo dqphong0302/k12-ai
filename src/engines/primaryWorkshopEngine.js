@@ -187,7 +187,11 @@ export const primaryWorkshopEngine = defineGameEngine({
     }
     if(action.type==='run'){
       const run=evaluateWorkshop(state,game)
-      return {...state,runs:[...state.runs.slice(-99),run],message:run.message,mistakes:state.mistakes+(run.passed?0:1)}
+      // workshopReady() demands two different configurations with the last one passing, so at
+      // least one non-passing run is the task itself, not an error. The first one is free;
+      // repeating the comparison after seeing the result is what the star rule should catch.
+      const comparisonRun=!run.passed&&!state.runs.some(previous=>!previous.passed)
+      return {...state,runs:[...state.runs.slice(-99),run],message:run.message,mistakes:state.mistakes+(run.passed||comparisonRun?0:1)}
     }
     if(action.type==='reflection')return {...state,reflection:String(action.value||'').slice(0,600)}
     if(action.type==='finish')return workshopReady(state,game)&&state.reflection.trim().length>=25?{...state,completed:true}:{...state,message:'Cần hai cấu hình khác nhau được kiểm tra (hoặc cặp thử có kiểm soát), kèm giải thích từ kết quả.'}

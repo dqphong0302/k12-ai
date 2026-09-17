@@ -7,6 +7,7 @@ import {primaryAdvancedGames} from './primaryAdvancedGames.js'
 import {getGameEngine} from '../engines/index.js'
 import {primaryWorkshopEngine as workshop,workshopReady} from '../engines/primaryWorkshopEngine.js'
 import {getLessonContent} from '../lessonContent.js'
+import {countDecisionPoints,scoreForMistakes} from '../runtime/activityRuntime.js'
 
 test('60 bài riêng, mã chuẩn tồn tại, đủ 8 trò mỗi lớp và ảnh',()=>{
   const official=readFileSync(new URL('../../document/2422_PL.md',import.meta.url),'utf8')
@@ -181,4 +182,27 @@ test('mỗi lượt chơi không có hai lựa chọn giống hệt nhau',()=>{
       const options=round.options||round.cards||round.parts
       assert.equal(new Set(options).size,options.length,`${game.id}: lựa chọn trùng khiến em không phân biệt được nút`)
     }
+})
+
+test('lượt chạy so sánh bắt buộc không bị tính là lỗi, lặp lại thì có',()=>{
+  // workshopReady đòi hai cấu hình khác nhau và lượt cuối phải đạt, nên với xưởng chỉ có
+  // duy nhất một cấu hình đúng thì học sinh buộc phải chạy một lượt không đạt.
+  const game=Object.values(primaryActivities).flat().find(g=>g.id==='grade-3-clean-data')
+  const target=Object.fromEntries(game.samples.map(s=>[s.id,s.usable?s.truth:'Loại']))
+  const wrong={...target,[game.samples[0].id]:'Loại'===target[game.samples[0].id]?game.labels[0]:'Loại'}
+  const play=configs=>{
+    let state=workshop.initialState(game)
+    for(const config of configs){
+      for(const [id,value] of Object.entries(config))state=workshop.reduce(state,{type:'assign',id,value},game)
+      state=workshop.reduce(state,{type:'run'},game)
+    }
+    return state
+  }
+  assert.equal(play([wrong,target]).mistakes,0,'lượt so sánh đầu tiên là nhiệm vụ, không phải lỗi')
+  assert.equal(play([wrong,wrong]).mistakes,1,'chạy lại cấu hình đã sai mới là lỗi')
+  let done=play([wrong,target])
+  done=workshop.reduce(done,{type:'reflection',value:'Em so sánh hai bảng nhãn và giữ bảng có bằng chứng đúng hơn.'},game)
+  done=workshop.reduce(done,{type:'finish'},game)
+  assert.equal(done.completed,true)
+  assert.equal(scoreForMistakes(done.mistakes,countDecisionPoints(game)),3,'xưởng phải có đường đạt 3 sao')
 })

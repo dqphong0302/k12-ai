@@ -8,7 +8,7 @@ import { getLessonAudioPath, getLessonContent, grades } from './lessonContent'
 import { useVietnameseSpeech } from './useVietnameseSpeech'
 import { playCorrectSound, playWrongSound, playVictorySound, playPopSound } from './runtime/audioEffects'
 import { primaryActivities as interactiveGames } from './content/primaryActivities'
-import { activityReducer, createActivityState, scoreForMistakes } from './runtime/activityRuntime'
+import { activityReducer, countDecisionPoints, createActivityState, scoreForMistakes } from './runtime/activityRuntime'
 import { simulationEngine } from './engines/simulationEngine'
 import ActivityErrorBoundary from './components/ActivityErrorBoundary'
 import { mobileNetAdapter } from './adapters/mobileNetAdapter'
@@ -438,7 +438,8 @@ function GameModal({ game, best, close, onComplete }) {
   useEffect(() => {
     if (runtimeReady && game.type === 'code') dispatchActivity({ type: 'snapshot', data: { program, position: robot, predictedDestination, executionStep, positions: executionPositions, outside: false, runs: programRuns, removedBlocks }, mistakes })
   }, [executionPositions, executionStep, game.type, mistakes, predictedDestination, program, programRuns, removedBlocks, robot, runtimeReady])
-  const stars = scoreForMistakes(mistakes)
+  const decisions = countDecisionPoints(game)
+  const stars = scoreForMistakes(mistakes, decisions)
   const finishGame = (earned, artifact=activityState.data) => {
     dispatchActivity({ type: 'complete', score: earned, evidence:{kind:'activity-complete',data:structuredClone(artifact)} })
     setEarnedStars(earned)
@@ -459,7 +460,7 @@ function GameModal({ game, best, close, onComplete }) {
       return
     }
     playCorrectSound(settings.audio)
-    if (simulationEngine.isComplete(nextData, game)) finishGame(scoreForMistakes(activityState.mistakes),nextData)
+    if (simulationEngine.isComplete(nextData, game)) finishGame(scoreForMistakes(activityState.mistakes, decisions),nextData)
   }
   const resetExecution = () => { setRobot(game.start); setExecutionStep(0); setExecutionPositions([[...game.start]]) }
   const addBlock = key => {
@@ -519,8 +520,8 @@ function GameModal({ game, best, close, onComplete }) {
       {!complete ? <>
         <header className="game-modal-head"><span className="game-hero-icon" aria-hidden="true">{game.icon}</span><div><small>TRÒ CHƠI LỚP {game.grade} · {game.ministry}</small><h2 id="game-title">{gameTitle}</h2><p>{gameDescription}</p><span className="modal-ai-label"><Bot size={14}/> Đang dùng: {game.aiApp}</span></div></header>
         {runtimeReady && <aside className="primary-game-help"><button type="button" disabled={activityState.hintsUsed >= game.hints.length || (settings.difficulty==='challenge'&&!activityState.mistakes)} onClick={()=>dispatchActivity({type:'hint'})}><Lightbulb size={14}/> {activityState.hintsUsed ? `Gợi ý cấp ${activityState.hintsUsed}` : 'Mở gợi ý'}</button><p aria-live="polite">{activityState.hintsUsed ? game.hints[Math.min(activityState.hintsUsed,game.hints.length)-1] : settings.difficulty==='guided'?game.hints[0]:settings.difficulty==='challenge'?'Chế độ thử thách: gợi ý mở sau lần thử sai đầu tiên.':'Tiến trình được lưu tự động trên thiết bị.'}</p></aside>}
-        {!runtimeReady ? <p className="game-message" role="status">Đang khôi phục hoạt động…</p> : game.extended&&game.id==='sensor-safari' ? <SensorSafariQuest game={game} onMistake={()=>setMistakes(value=>value+1)} onFinish={(artifact,totalMistakes)=>finishGame(scoreForMistakes(totalMistakes),artifact)}/> : game.extended&&game.id==='bobo-first-code' ? <StarMazeQuest game={game} onMistake={()=>setMistakes(value=>value+1)} onFinish={(artifact,totalMistakes)=>finishGame(scoreForMistakes(totalMistakes),artifact)}/> : game.type === 'simulation' ? <SimulationGame game={game} found={activityState.data.found} message={message} onSelect={selectObject}/> : game.type === 'code' ? <CodeGame game={game} program={program} robot={robot} predictedDestination={predictedDestination} executionStep={executionStep} running={running} message={message} onPredict={position=>{playPopSound(settings.audio);setPredictedDestination(position);setMessage(`Em dự đoán Bo-Bo sẽ dừng ở cột ${position[0]+1}, hàng ${position[1]+1}.`)}} onAdd={addBlock} onUndo={undoProgram} onReset={() => { playPopSound(settings.audio);setProgram([]);setPredictedDestination(null);resetExecution();setMessage('') }} onStep={stepProgram} onRun={runProgram}/> : <MechanicGame game={game} initialState={activityState.data} onStateChange={state=>dispatchActivity({type:'snapshot',data:state,mistakes:state.mistakes})} onFinish={finishGame} onMistake={() => setMistakes(value => value + 1)}/>} 
-        <footer className="game-modal-footer"><span>{best ? `Kỷ lục: ${best}/3 sao` : 'Chạm, thử và sửa — em đang học như một nhà sáng tạo!'}</span><div className="live-stars"><Star size={17} fill="currentColor"/> {scoreForMistakes(mistakes)}/3 sao</div></footer>
+        {!runtimeReady ? <p className="game-message" role="status">Đang khôi phục hoạt động…</p> : game.extended&&game.id==='sensor-safari' ? <SensorSafariQuest game={game} onMistake={()=>setMistakes(value=>value+1)} onFinish={(artifact,totalMistakes)=>finishGame(scoreForMistakes(totalMistakes, decisions),artifact)}/> : game.extended&&game.id==='bobo-first-code' ? <StarMazeQuest game={game} onMistake={()=>setMistakes(value=>value+1)} onFinish={(artifact,totalMistakes)=>finishGame(scoreForMistakes(totalMistakes, decisions),artifact)}/> : game.type === 'simulation' ? <SimulationGame game={game} found={activityState.data.found} message={message} onSelect={selectObject}/> : game.type === 'code' ? <CodeGame game={game} program={program} robot={robot} predictedDestination={predictedDestination} executionStep={executionStep} running={running} message={message} onPredict={position=>{playPopSound(settings.audio);setPredictedDestination(position);setMessage(`Em dự đoán Bo-Bo sẽ dừng ở cột ${position[0]+1}, hàng ${position[1]+1}.`)}} onAdd={addBlock} onUndo={undoProgram} onReset={() => { playPopSound(settings.audio);setProgram([]);setPredictedDestination(null);resetExecution();setMessage('') }} onStep={stepProgram} onRun={runProgram}/> : <MechanicGame game={game} initialState={activityState.data} onStateChange={state=>dispatchActivity({type:'snapshot',data:state,mistakes:state.mistakes})} onFinish={finishGame} onMistake={() => setMistakes(value => value + 1)}/>} 
+        <footer className="game-modal-footer"><span>{best ? `Kỷ lục: ${best}/3 sao` : 'Chạm, thử và sửa — em đang học như một nhà sáng tạo!'}</span><div className="live-stars"><Star size={17} fill="currentColor"/> {scoreForMistakes(mistakes, decisions)}/3 sao</div></footer>
       </> : <div className="game-complete"><CelebrationBurst/><span className="reward-cup"><Trophy/></span><small>HOÀN THÀNH THỬ THÁCH</small><h2 id="game-title">Tuyệt lắm, nhà sáng tạo!</h2><p>Em đã hoàn thành nhiệm vụ và nhận được</p><div className="reward-stars" aria-label={`${earnedStars} sao`}>{[1, 2, 3].map(value => <Star key={value} fill={value <= earnedStars ? 'currentColor' : 'none'}/>)}</div><div className="complete-actions"><button id="game-replay" className="secondary" onClick={replay}><RotateCcw size={17}/> Chơi lại</button><button id="game-finish" className="primary" onClick={close}>Nhận sao <Check size={17}/></button></div></div>}
     </section>
   </div>
@@ -642,6 +643,7 @@ const roundOptions = round => round.options || round.cards || round.parts
 function MechanicGame({ game, initialState, onStateChange, onFinish, onMistake }) {
   const settings = useLearningSettings()
   const engine = getGameEngine(game.type)
+  const decisions = countDecisionPoints(game)
   const [state, dispatch] = useReducer((current, action) => engine.reduce(current, action, game), initialState || engine.initialState(game))
   // Answers are matched by value, so the buttons can be re-ordered: without this the
   // correct choice sits first in almost every round and can be won by always tapping left.
@@ -669,7 +671,7 @@ function MechanicGame({ game, initialState, onStateChange, onFinish, onMistake }
     return next
   }
   const finishIfComplete = next => {
-    if (engine.isComplete(next, game)) onFinish(scoreForMistakes(next.mistakes || 0),next)
+    if (engine.isComplete(next, game)) onFinish(scoreForMistakes(next.mistakes || 0, decisions),next)
   }
   if (game.type === 'challenge') {
     const round = game.rounds[step]
@@ -687,7 +689,7 @@ function MechanicGame({ game, initialState, onStateChange, onFinish, onMistake }
   if (game.type === 'sequence' || game.type === 'pipeline') {
     const steps = game.sequenceItems || game.stages
     const order = steps.map((_,index)=>index).sort((a,b)=>(a%2)-(b%2)||b-a)
-    return <GameShell game={game} ai={ai} progress={`${selected.length}/${steps.length}`} instruction="Xây từng bước của ứng dụng AI" feedback={feedback}><div className="sequence-track">{selected.map((index, position) => <span key={index}><b>{position + 1}</b>{steps[index]}</span>)}</div><div className="mechanic-grid">{order.map(index => <button id={`order-step-${index}`} disabled={selected.includes(index)} key={steps[index]} onClick={() => commit({type:'select',index})}><span>{game.icons?.[index] || ['🎯','📦','🧠','🧪','🔧'][index]}</span>{steps[index]}</button>)}</div>{ready && <button id="ai-accept-result" className="primary mechanic-check" onClick={() => onFinish(scoreForMistakes(errors),state)}>✅ Em đã kiểm tra kết quả mô phỏng</button>}</GameShell>
+    return <GameShell game={game} ai={ai} progress={`${selected.length}/${steps.length}`} instruction="Xây từng bước của ứng dụng AI" feedback={feedback}><div className="sequence-track">{selected.map((index, position) => <span key={index}><b>{position + 1}</b>{steps[index]}</span>)}</div><div className="mechanic-grid">{order.map(index => <button id={`order-step-${index}`} disabled={selected.includes(index)} key={steps[index]} onClick={() => commit({type:'select',index})}><span>{game.icons?.[index] || ['🎯','📦','🧠','🧪','🔧'][index]}</span>{steps[index]}</button>)}</div>{ready && <button id="ai-accept-result" className="primary mechanic-check" onClick={() => onFinish(scoreForMistakes(errors, decisions),state)}>✅ Em đã kiểm tra kết quả mô phỏng</button>}</GameShell>
   }
   if (game.type === 'matching') {
     const pair = game.pairs[step]
@@ -719,7 +721,7 @@ function MechanicGame({ game, initialState, onStateChange, onFinish, onMistake }
   if (game.type === 'balance') {
     const used = counts.reduce((sum, value) => sum + value, 0)
     const checkBalance = () => commit({ type: 'check' })
-    return <GameShell game={game} ai={ai} progress={`${used}/${game.total}`} instruction="Thêm dữ liệu rồi kiểm tra mức đại diện" feedback={feedback}><div className="balance-scale">{game.groups.map((group, index) => <article key={group}><span>{['👧🏻','👦🏽','👧🏿'][index]}</span><b>{group}</b><strong>{counts[index]}</strong><div><button id={`balance-remove-${index}`} disabled={!counts[index]} onClick={() => commit({type:'remove',group:index})}>−</button><button id={`balance-add-${index}`} disabled={used >= game.total} onClick={() => commit({type:'add',group:index})}>+</button></div></article>)}</div><button id="balance-check" className="primary mechanic-check" disabled={used < game.total} onClick={checkBalance}>⚖️ Kiểm tra dữ liệu</button>{state.auditResults.length>0&&<div className="group-audit"><h3>Kết quả trên cùng 10 mẫu kiểm thử mỗi nhóm</h3>{state.auditResults.map(result=><p key={result.group}><b>{result.group}</b><span>{result.correct}/{result.total} dự đoán đúng</span><strong>{result.accuracy}%</strong></p>)}<small>Ba nhóm có cùng số mẫu học nhưng tỷ lệ đúng vẫn khác nhau. Cần xem loại lỗi, bối cảnh và tác động trước khi kết luận công bằng.</small></div>}{ready&&<button id="accept-representation-audit" className="primary mechanic-check" onClick={()=>onFinish(scoreForMistakes(errors),state)}>Em đã xem kết quả theo nhóm</button>}</GameShell>
+    return <GameShell game={game} ai={ai} progress={`${used}/${game.total}`} instruction="Thêm dữ liệu rồi kiểm tra mức đại diện" feedback={feedback}><div className="balance-scale">{game.groups.map((group, index) => <article key={group}><span>{['👧🏻','👦🏽','👧🏿'][index]}</span><b>{group}</b><strong>{counts[index]}</strong><div><button id={`balance-remove-${index}`} disabled={!counts[index]} onClick={() => commit({type:'remove',group:index})}>−</button><button id={`balance-add-${index}`} disabled={used >= game.total} onClick={() => commit({type:'add',group:index})}>+</button></div></article>)}</div><button id="balance-check" className="primary mechanic-check" disabled={used < game.total} onClick={checkBalance}>⚖️ Kiểm tra dữ liệu</button>{state.auditResults.length>0&&<div className="group-audit"><h3>Kết quả trên cùng 10 mẫu kiểm thử mỗi nhóm</h3>{state.auditResults.map(result=><p key={result.group}><b>{result.group}</b><span>{result.correct}/{result.total} dự đoán đúng</span><strong>{result.accuracy}%</strong></p>)}<small>Ba nhóm có cùng số mẫu học nhưng tỷ lệ đúng vẫn khác nhau. Cần xem loại lỗi, bối cảnh và tác động trước khi kết luận công bằng.</small></div>}{ready&&<button id="accept-representation-audit" className="primary mechanic-check" onClick={()=>onFinish(scoreForMistakes(errors, decisions),state)}>Em đã xem kết quả theo nhóm</button>}</GameShell>
   }
   if (ROUND_GAMES.includes(game.type)) {
     const round = game.rounds[step]

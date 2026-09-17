@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
-import { activityReducer, createActivityState, scoreForMistakes } from './activityRuntime.js'
+import { activityReducer, countDecisionPoints, createActivityState, scoreForMistakes } from './activityRuntime.js'
 import { ActivitySessionRemovedError, loadActivityState, saveActivityState } from './activityStore.js'
 
 function createSession(activity, engine) {
@@ -25,7 +25,7 @@ function sessionReducer(state, action) {
     evidence: action.evidence
   })
   if (action.engine.isComplete(nextData, action.activity)) {
-    const score = Number(nextData.score) || scoreForMistakes(nextMistakes)
+    const score = Number(nextData.score) || scoreForMistakes(nextMistakes, countDecisionPoints(action.activity))
     next = activityReducer(next, { type: 'complete', score, evidence: { kind: 'activity-complete', data: action.engine.serialize(nextData) } })
   }
   return next
