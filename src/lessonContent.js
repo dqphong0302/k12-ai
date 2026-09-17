@@ -1,4 +1,4 @@
-import { primaryLessonDetails } from './content/primaryLessonDetails.js'
+import { primaryLessonDetails, primaryLessonExtraGames } from './content/primaryLessonDetails.js'
 
 export const grades = [
   { id: 1, label: 'Lớp 1', age: '6–7 tuổi', color: '#a8462f', titles: ['Con người biết cảm xúc', 'Bo-Bo biểu cảm thế nào?', 'Nhận ra máy thông minh', 'Mắt của máy tính', 'Tai của máy tính', 'AI nhận biết quanh em', 'Máy học từ ví dụ', 'Nhiều loại máy thông minh', 'Em dạy Bo-Bo', 'Việc tốt, việc chưa tốt', 'Máy thông minh làm việc tốt', 'Em là công dân số nhí'] },
@@ -98,6 +98,7 @@ export function getLessonContent({ grade, index, title }) {
     duration: grade <= 2 ? '30–35 phút' : '35–40 phút',
     standards: detail.standards,
     gameId: detail.gameId,
+    extraGameIds: primaryLessonExtraGames[grade]?.[index] || [],
     goal: `Em sẽ ${detail.steps[2].charAt(0).toLowerCase()+detail.steps[2].slice(1)}.`,
     explanation: detail.focus,
     theoryPoints: theorySentences(detail.focus),

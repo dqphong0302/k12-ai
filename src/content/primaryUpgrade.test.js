@@ -6,6 +6,7 @@ import {primaryLessons} from './primaryLessonActivities.js'
 import {primaryAdvancedGames} from './primaryAdvancedGames.js'
 import {getGameEngine} from '../engines/index.js'
 import {primaryWorkshopEngine as workshop,workshopReady} from '../engines/primaryWorkshopEngine.js'
+import {primaryLessonDetails,primaryLessonExtraGames} from './primaryLessonDetails.js'
 import {getLessonContent} from '../lessonContent.js'
 import {countDecisionPoints,scoreForMistakes} from '../runtime/activityRuntime.js'
 
@@ -205,4 +206,14 @@ test('lượt chạy so sánh bắt buộc không bị tính là lỗi, lặp l�
   done=workshop.reduce(done,{type:'finish'},game)
   assert.equal(done.completed,true)
   assert.equal(scoreForMistakes(done.mistakes,countDecisionPoints(game)),3,'xưởng phải có đường đạt 3 sao')
+})
+
+test('mọi trò của lớp đều mở được từ một tiết học',()=>{
+  for(const [grade,lessons] of Object.entries(primaryLessonDetails)){
+    const linked=new Set(lessons.map(lesson=>lesson.gameId))
+    for(const list of Object.values(primaryLessonExtraGames[grade]||{}))for(const id of list)linked.add(id)
+    const available=primaryActivities[grade].map(game=>game.id)
+    for(const id of linked)assert.ok(available.includes(id),`lớp ${grade} trỏ tới trò không có: ${id}`)
+    for(const id of available)assert.ok(linked.has(id),`lớp ${grade}: trò ${id} không tiết nào mở được`)
+  }
 })

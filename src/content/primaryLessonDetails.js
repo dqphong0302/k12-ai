@@ -83,3 +83,12 @@ for (const [grade, lessons] of Object.entries(primaryLessonDetails)) lessons.for
   item.quiz.options=[...item.quiz.options.slice(shift),...item.quiz.options.slice(0,shift)]
   item.quiz.correct=(3-shift)%3
 })
+
+// Trạm thực hành phụ của một tiết. Mỗi lớp có 8 trò nhưng 12 tiết, nên nếu mỗi tiết chỉ trỏ
+// tới đúng một trò thì vài trò không bao giờ mở được từ bài học. Chỉ ghép khi mã chuẩn của
+// trò nằm trong mã chuẩn của tiết (riêng lớp 2 tiết 4 ghép theo chủ đề dữ liệu âm thanh).
+export const primaryLessonExtraGames = {
+  1: { 2: ['sensor-path'] },
+  2: { 3: ['sound-lab-journey'], 6: ['pattern-lanterns'], 7: ['robot-command-debug'] },
+  3: { 8: ['fact-check-code'] }
+}
