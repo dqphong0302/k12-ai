@@ -27,15 +27,17 @@ Chuẩn bị và chạy thử trước ngày dạy; kiểm tra lại trước gi
   - Với bài nhận diện hình ảnh (Khu vườn thông minh): Nếu phòng máy không có webcam hoặc học sinh từ chối cấp quyền, hệ thống tự động cung cấp nút **"Nhận diện ảnh mẫu trên thiết bị"** mà không ảnh hưởng đến tiến trình học.
 
 ### Bước 2: Tải và Cache Dữ liệu Offline
-1. Mở trình duyệt và truy cập trang web công cụ.
+1. Mở trình duyệt khi có mạng và truy cập trang web công cụ. Nếu vừa cập nhật phiên bản, nhờ kỹ thuật viên xác nhận service worker mới đã kiểm soát trang, rồi tải lại online trước khi chuẩn bị tài nguyên. Chỉ thấy cache mới xuất hiện chưa đủ; không cập nhật giữa tiết học.
 2. Bấm vào biểu tượng **Teacher Mode** (Góc dưới hoặc nút "Giáo viên").
 3. Bấm nút **"Chạy kiểm tra thiết bị"**:
    - Xác nhận các mục: *IndexedDB, Bộ nhớ cục bộ, Offline shell, Audio MP3, Ngữ cảnh bảo mật* đều hiển thị **Sẵn sàng**.
-   - Kiểm tra hàng **MobileNet offline**: Nếu hiển thị *Chưa tải*, mở thử một bài có camera hoặc lab lá cây để trình duyệt tự động cache mô hình.
+   - Chỉ kiểm tra **MobileNet offline** khi bài dùng nhận diện MobileNet. Nếu hiển thị *Chưa tải*, mở chức năng nhận diện tương ứng và chờ tải xong; lab lá dùng mô hình riêng, không thay cho bước này.
 4. Mở từng bài sẽ dạy, phát đủ các phần audio và chạy thử công cụ/mô hình tương ứng đến khi tải xong. Lab lá không đồng nghĩa đã tải MobileNet; chỉ yêu cầu mô hình mà bài thực sự sử dụng.
 5. Ngắt mạng, tải lại trang rồi mở đúng bài, phát audio, thử hoạt động và kiểm tra lưu tiến độ. Nếu thiếu tài nguyên, kết nối lại để chuẩn bị hoặc dùng phương án giấy; không cam kết offline chỉ dựa vào báo cáo shell.
 6. Bấm **"Xuất báo cáo thiết bị JSON"** và lưu lại tệp `bobo-kiem-tra-thiet-bi.json` cùng kết quả thử thực tế, mã máy và phiên bản trình duyệt.
 7. **"Tải gói chuẩn bị offline"** xuất học liệu/phiếu HTML, không đóng gói toàn bộ ứng dụng tương tác hoặc mô hình. Không coi việc có tệp này là chứng minh lab chạy offline.
+
+Sau cập nhật cache, lặp lại bước 4–6 trên từng máy: audio/mô hình đã tải ở phiên bản cũ có thể cần tải lại. Việc đổi cache ứng dụng không chủ đích xóa tiến độ/minh chứng localStorage; vẫn xuất bản sao minh chứng trước cập nhật và kiểm tra lại sau đó. Không dùng lệnh xóa toàn bộ dữ liệu trình duyệt để xử lý cache khi chưa sao lưu.
 
 ### Bước 3: In Phiếu Hoạt động (Worksheet)
 - Trong Teacher Mode, chọn đúng hoạt động của buổi học.
@@ -113,7 +115,7 @@ Quy tắc pilot: không yêu cầu học sinh nhập họ tên thật, ngày sin
 
 ## 7. Tập huấn giáo viên: hai buổi 90 phút
 
-Người phụ trách chuyên môn điều phối, đầu mối kỹ thuật hỗ trợ. Dùng dữ liệu giả định và máy thử, không dùng hồ sơ trẻ thật. Mỗi giáo viên chọn một bài đúng khối; năm giáo án pilot có sẵn trong Công cụ giáo viên và gói offline.
+Người phụ trách chuyên môn điều phối, đầu mối kỹ thuật hỗ trợ. Dùng dữ liệu giả định và máy thử, không dùng hồ sơ trẻ thật. Bảy giáo án có sẵn trong Công cụ giáo viên và gói offline: cốt lõi 1/7, 2/10, 3/3, 4/4, 5/5; mở rộng 4/5, 5/6. Chọn đúng phạm vi trường đã duyệt, không thay pilot cốt lõi bằng kết quả bài mở rộng.
 
 | Buổi | Thời gian | Hoạt động | Sản phẩm kiểm tra |
 |---|---|---|---|

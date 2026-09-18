@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, Download, Presentation, Settings, Upload, X } from 'lucide-react'
-import { activityRegistry } from '../content/activities.js'
+import { activityRegistry as baseActivityRegistry } from '../content/activities.js'
+import { withCorePilotSupport } from '../content/corePilotTeacherSupport.js'
 import { importActivityStates, listActivityStates, previewEvidenceImport, recordsForSession, removeActivitySession, saveTeacherAssessment, saveTeacherObservation, validateEvidenceImport } from '../runtime/activityStore.js'
 import { buildEvidenceReport, reportToCsv } from '../runtime/evidenceReport.js'
 import { updateLearningSettings, useLearningSettings } from '../runtime/learningSettings.js'
@@ -11,6 +12,7 @@ import { buildActivityWorksheet, worksheetFilename } from '../runtime/activityWo
 import { buildOfflineLessonPack, offlinePackFilename } from '../runtime/offlineLessonPack.js'
 
 const stages={primary:[1,2,3,4,5],middle:[6,7,8,9],high:[10,11,12]}
+const activityRegistry=baseActivityRegistry.map(withCorePilotSupport)
 
 function AudioVoiceCatalog() {
   const storageKey='bobo-voice-review-v1'
@@ -95,7 +97,7 @@ function ScopeControls() {
   }
   return <form className="teacher-scope" onSubmit={submit}>
     <h3>Phiên học và nhóm dùng máy</h3>
-    <p>Dùng mã không định danh. Chuyển nhóm sẽ đóng hoạt động đang mở; quay về mã cũ để tiếp tục. Dữ liệu trước đây nằm ở phiên default, nhóm default.</p>
+    <p>Dùng mã thay tên thật; mã vẫn có thể liên kết với học sinh nên cần bảo vệ. Chuyển nhóm sẽ đóng hoạt động đang mở; quay về mã cũ để tiếp tục. Dữ liệu trước đây nằm ở phiên default, nhóm default.</p>
     <label>Mã phiên<input id="learning-session" value={sessionId} maxLength={40} required pattern="(?:[a-zA-Z0-9_]|-)+" onChange={event => setSessionId(event.target.value)}/></label>
     <label>Mã nhóm<input id="learning-group" value={learnerOrGroupId} maxLength={40} required pattern="(?:[a-zA-Z0-9_]|-)+" onChange={event => setGroupId(event.target.value)}/></label>
     <button id="apply-learning-scope" type="submit">Dùng phiên và nhóm này</button>

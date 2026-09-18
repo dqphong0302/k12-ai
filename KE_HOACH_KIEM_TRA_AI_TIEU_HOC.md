@@ -4,6 +4,18 @@ Ngày rà soát: 15/09/2026. Phạm vi: lớp 1–5, 60 bài hiện có, nội d
 
 ## 1. Kết luận
 
+**Trạng thái bàn giao tạm thời 16/09/2026:** chưa đủ điều kiện tuyên bố sẵn sàng triển khai diện rộng. Build, metadata, xuất học liệu và các luồng tiểu học đã kiểm tra có kết quả đạt trong phạm vi ghi ở mục 8; 240 audio khớp provenance, chưa nghe duyệt. Không còn tiến trình tạo audio cần chờ.
+
+| Cổng còn mở | Bằng chứng còn phải có |
+|---|---|
+| Nội dung và lịch cốt lõi | Người phụ trách chuyên môn duyệt lịch thay sáu bài MR; đối chiếu ngữ nghĩa từng yêu cầu với nhiệm vụ và minh chứng, không chỉ đủ mã |
+| Học liệu | Duyệt nghe audio, ảnh và bản in các bài sẽ dạy; ghi người duyệt, lỗi và phiên bản |
+| Thiết bị | Kết quả thử đúng máy trường: offline sau cập nhật, camera bị từ chối, lưu/nhập minh chứng; thử Safari nếu sử dụng |
+| Tập huấn | Giáo viên thực hiện dạy mẫu, xử lý mất mạng, xuất/nhập và hiệu chỉnh rubric theo hai buổi trong SOP |
+| Pilot | Trường/khối, sĩ số, giáo viên, người quan sát, lịch được duyệt; phiếu cá nhân và log thực tế của hai tiết/khối |
+
+Thông tin trường còn trống trong SOP, chưa có bằng chứng hoạt động trên đã diễn ra. Không tự điền người phụ trách, xác nhận nghe duyệt hoặc số liệu học sinh bằng dữ liệu giả định. Các kiểm tra kỹ thuật còn thiếu vẫn cần thực hiện; danh sách này không chuyển chúng thành việc đã hoàn thành.
+
 Giữ cấu trúc 12 tiết/khối và phát triển tăng dần từ nhận biết, phân loại, kiểm chứng đến huấn luyện và cải tiến. Nội dung đã có nhiều phân biệt đúng: lập trình không đồng nghĩa học máy; mẫu học khác mẫu thử; số mẫu cân bằng không bảo đảm công bằng; AI hỗ trợ nhưng con người chịu trách nhiệm.
 
 Chưa nên coi nền tảng đã sẵn sàng triển khai diện rộng chỉ vì kiểm thử phần mềm đạt. Cần xử lý lỗi nhất quán dữ liệu, tách yêu cầu cốt lõi/mở rộng, chuẩn hóa hướng dẫn tiết học và xác nhận vận hành trên thiết bị trường. Sau đó pilot có kiểm soát trước khi mở rộng.
@@ -62,7 +74,7 @@ Phương án lịch dưới đây giữ 12 tiết/khối bằng cách dành ch�
 |---|---|---|---|
 | Lớp 2, tiết 9 | `primary-2-9` | Thực hành tiếp bài 2/7–2/8: nêu nhu cầu, vẽ ý tưởng máy hỗ trợ, giải thích dữ liệu cần dùng và sửa một nhãn không đúng | Mỗi em chỉ vấn đề, một dữ liệu phù hợp và giải thích một lựa chọn; không bắt buộc huấn luyện công cụ |
 | Lớp 3, tiết 5 | `primary-3-5` | Thực hành tiếp bài 3/4: chọn dữ liệu liên quan cho hai tình huống khác nhau, giải thích vì sao một dữ liệu không giúp trả lời vấn đề | Em chọn dữ liệu và nêu lý do trong tình huống mới; không bắt buộc tạo thẻ đặc trưng mở rộng |
-| Lớp 4, tiết 5 | `primary-4-5` | Thực hành tiếp bài 4/4: dùng công cụ nhận dạng phù hợp, đối chiếu đầu ra với mẫu gốc do giáo viên chuẩn bị | Chỉ đầu vào, đầu ra và một chỗ cần người kiểm tra; dùng công cụ thật nếu yêu cầu thực hành đòi hỏi |
+| Lớp 4, tiết 5 | `primary-4-5` | Vận dụng bài 4/4: nêu ứng dụng AI phù hợp cho tình huống học tập và đời sống Việt Nam khác với ví dụ làm mẫu | Mỗi em nêu ứng dụng, người dùng và việc được hỗ trợ; trải nghiệm công cụ là phần MR, không bắt buộc để đạt 4.C2.1 |
 | Lớp 4, tiết 8 | `primary-4-8` | Thực hành tiếp bài 4/7: nhóm đề xuất giải pháp cho một vấn đề gần gũi, xác định người dùng, mục tiêu và phần AI có thể hỗ trợ | Mỗi em giải thích một lựa chọn thiết kế và một giới hạn; không thay bằng thao tác gắn nhãn lá |
 | Lớp 4, tiết 12 | `primary-4-12` | Vận dụng bài 4/10–4/11: nhận ra dữ liệu cá nhân trong thẻ tình huống giả định, quyết định có cung cấp hay không và giải thích | Từng em nhận diện dữ liệu, chọn hành động và lý do; không dùng mật khẩu thật hoặc mô phỏng sự cố ngoài phạm vi cốt lõi để chấm bắt buộc |
 | Lớp 5, tiết 6 | `primary-5-6` | Thực hành tiếp bài 5/5: sử dụng công cụ học máy trực quan có hướng dẫn, quan sát đầu vào và kết quả | Ghi được thao tác thực tế và giải thích kết quả của mình; đánh giá theo yêu cầu gốc của bài 5/5, không buộc đạt tiêu chí MR3 |
@@ -71,7 +83,7 @@ Các bài MR được giữ trong thư viện, bố trí CLB/buổi mở rộng 
 
 ### Hai giáo án pilot cốt lõi thay thế: lớp 4 và 5
 
-Đối chiếu chính văn `4.C2.1`: nêu ứng dụng AI gần gũi với học tập/đời sống Việt Nam; trải nghiệm ứng dụng là `4.C2.MR1`. `5.C5.2`: thực hiện thao tác cơ bản với công cụ học máy trực quan; tự huấn luyện và tìm lỗi phân loại lần lượt là `5.C5.MR2/MR3`. Không lấy mục tiêu MR làm điều kiện đạt cốt lõi. Giáo án dưới đây bổ sung cho phương án lịch; chưa tích hợp vào TeacherDock.
+Đối chiếu chính văn `4.C2.1`: nêu ứng dụng AI gần gũi với học tập/đời sống Việt Nam; trải nghiệm ứng dụng là `4.C2.MR1`. `5.C5.2`: thực hiện thao tác cơ bản với công cụ học máy trực quan; tự huấn luyện và tìm lỗi phân loại lần lượt là `5.C5.MR2/MR3`. Không lấy mục tiêu MR làm điều kiện đạt cốt lõi. Giáo án dưới đây bổ sung cho phương án lịch; đã tích hợp vào TeacherDock ngày 16/09/2026, chưa được thực dạy pilot.
 
 **Lớp 4 — bài 4/4, 35 phút, cốt lõi 4.C2.1.** Chuẩn bị ba thẻ tình huống do giáo viên viết: ứng dụng chuyển lời nói tiếng Việt thành chữ; ứng dụng hỗ trợ nhận dạng bệnh lá lúa từ ảnh; công tắc bật đèn thông thường. Hai thẻ AI phải ghi rõ “ví dụ ứng dụng có sử dụng AI”, tránh suy mọi phần mềm đọc chữ hoặc nhận dạng đều dùng cùng kỹ thuật. Không cần tài khoản/camera/công cụ ngoài.
 
@@ -227,3 +239,21 @@ Nguồn lực phải chốt trước mở lớp: sĩ số và số máy hoạt �
 - Đã thử tích hợp hai giáo án cốt lõi 4/4 và 5/5 vào TeacherDock nhưng hủy phần import để giữ shell dưới budget 400 KiB; giáo án hiện được giữ trong kế hoạch, chưa xuất hiện như giáo án riêng trong TeacherDock. Build sau khi bỏ import đạt: shell 409.36 kB, validator 212 hoạt động. Cần tích hợp lại bằng module lazy hoặc cập nhật nội dung activity mà không vượt budget; không tuyên bố đã triển khai UI.
 - Audio phiên 91473: 109/240 mục (tạo 64, giữ 45), vẫn chạy ở lần kiểm tra đầu bước này.
 - Kiểm tra lại sau khi hoàn tác import TeacherDock: **110/110 unit test đạt**; nội dung/phiếu/offline không suy giảm. Build trước đó đã đạt shell 409.36 kB. Audio phiên 91473: 119/240 mục (tạo 71, giữ 48), vẫn chạy; chưa chạy `audio:check` hoặc nghe duyệt vì chưa hoàn tất.
+
+### Cập nhật ngày 16/09/2026
+
+- Đã chuyển hai giáo án cốt lõi vào `corePilotTeacherSupport.js`, chỉ import từ TeacherDock được tải riêng. Giữ metadata phân loại và không sửa registry gốc. Build đạt, shell 409.34 kB dưới budget; E2E Chromium xuất cả bảy giáo án (gồm 4/4 và 5/5), phiếu và kiểm tra CSS in đạt, không có pageerror.
+- Handle audio 91473 không còn tồn tại; kiểm tra tiến trình không thấy generator đang chạy. Provenance hiện xác nhận đủ 240 tệp, không thiếu/hỏng, cấu hình hợp lệ; còn **một tệp stale** `grade-1/lesson-03/part-1-theory.mp3`, đúng phần sửa sau khi generator khởi động. Cần chạy resume tạo bù tệp này rồi kiểm tra lại; chưa nghiệm thu nghe duyệt.
+- Đã kiểm tra health dịch vụ TTS: OK, giọng Trúc Ly sẵn có; không đổi giọng/cấu hình hoặc khởi động lại dịch vụ. Bắt đầu resume tuần tự để tạo bù tệp stale, phiên **76248**; đã bỏ qua tám tệp đầu khớp manifest và đang xử lý bài 1/3. Phải kiểm tra cùng phiên trước khi chạy lại. Tám test phiếu/offline và kiểm tra khoảng trắng các tệp tích hợp giáo án đạt.
+- Phiên 76248 hoàn tất thành công: tạo 1 tệp, giữ 239. Kiểm tra provenance sau hoàn tất đạt **240/240**, không thiếu, hỏng hoặc stale; cấu hình hợp lệ. Đây là kiểm tra tệp/hash, chưa phải nghe duyệt chất lượng lời đọc. Cần build lại để đưa tệp mới nhất vào dist và duyệt nghe trước pilot.
+- Đồng bộ bảng lịch lớp 4 với 4.C2.1: nêu ứng dụng và người dùng là cốt lõi, trải nghiệm công cụ không bắt buộc; sửa trạng thái tích hợp TeacherDock và đặt tên ảnh E2E theo cả khối/bài để bảy phiếu không ghi đè ảnh nhau.
+- Build lại sau audio mới đạt (shell 409.34 kB). Đối chiếu byte của **240 tệp MP3** trong `dist/audio/lessons` với `public/audio/lessons` đều trùng, xác nhận bản build chứa audio mới nhất. Không suy phép so byte này thành nghe duyệt hoặc triển khai lên máy trường.
+- Phát hiện service worker cache-first theo URL MP3 cố định, version vẫn 14/09 nên máy từng nghe có thể giữ audio cũ. Đã tăng version lên `bobo-k12-2026.09.16.1`; kiểm tra handler activate bằng Node VM xác nhận xóa cache phiên bản cũ và giữ bản mới. Máy trường cần online để nhận cập nhật rồi cache lại tài nguyên và thử offline; không xóa tiến độ/minh chứng localStorage. Cần build lại và kiểm chứng nâng cấp trong trình duyệt; chưa coi kiểm tra VM thay cho thử thiết bị.
+- Build với service worker mới đạt; ba E2E Chromium về xuất gói offline, app shell mất mạng và phát lại audio sau reload offline đều đạt (16/09). Các ca dùng môi trường mới, chưa mô phỏng đầy đủ nâng cấp từ service worker cũ; không thay thử máy trường hoặc nghe duyệt nội dung.
+- Mô phỏng nâng cấp Chromium trên HTTP localhost với mã service worker thực tế, audio sentinel cũ/mới và dữ liệu tiến độ giả: sau `controllerchange`, audio mới được lấy online và đọc lại offline, localStorage giữ nguyên, không pageerror. Lần thử đầu chỉ chờ cache cũ bị xóa đã nhận audio cũ vì controller chưa đổi: quy trình chuẩn bị phải chờ service worker mới kiểm soát trang, tải lại online rồi cache tài nguyên, không coi xuất hiện cache mới là cập nhật xong. Đây là mô phỏng giao thức cache, không nghe duyệt MP3 hay kiểm tra Safari/máy trường.
+- Ca từ chối camera trước đây đi sai trang đã chuyển sang `/kham-pha`. Chạy Chromium đi qua bước từ chối quyền, nhận diện ảnh mẫu và phần thử offline, nhưng toàn ca vẫn lỗi tại nút `#run-device-check` không xuất hiện trong TeacherDock hiện tại. Chưa công nhận toàn ca đạt; cần đối chiếu chức năng kiểm máy thực có với SOP, không bỏ assertion để che thiếu chức năng.
+- Đã xác định nút kiểm máy có trong `DeviceReadiness`; lỗi trên do mở TeacherDock lần đầu khi offline, chưa cache module lazy. Chuẩn bị TeacherDock online trước ngắt mạng theo SOP rồi chạy lại: toàn ca Chromium đạt (18 giây), gồm từ chối camera, nhận diện ảnh mẫu, không có POST ra ngoài trong bước suy luận, nhận diện lại offline và trạng thái MobileNet sẵn sàng. Giữ nguyên các assertion; không tuyên bố mọi module tự có sẵn offline hoặc đã thử camera Safari thật.
+- Hồi quy Chromium ngày 16/09: **14 ca tiểu học/giáo án đạt**, gồm chuyển minh chứng, bảy giáo án, lab lá hai phiên bản, pipeline, công bằng, kiểm chứng nguồn và trò chơi lớp 1–5. Lệnh lọc tên vô tình bắt thêm hai ca lớp 10–12; cả hai lỗi vì THPT là trang chờ, tổng lệnh 14 đạt/2 lỗi. Không sửa hành vi THPT ngoài phạm vi và không tuyên bố toàn bộ E2E đạt. Lần sau dùng ranh giới `lớp [1-5](?:[^0-9]|$)` để tránh chọn nhầm lớp 10/12.
+- Sửa điểm lệch trong hai giáo án cốt lõi: trước đây chỉ thay hướng dẫn giáo viên, phiếu vẫn dùng mục tiêu/rubric của bài có mở rộng. `withCorePilotSupport` nay đồng bộ mục tiêu, minh chứng và rubric ba mức cho bản giáo viên 4/4, 5/5; không sửa nguồn bài học sinh hoặc hash audio. Chín test phiếu/offline đạt. Cần build/E2E lại; rubric bốn chiều vẫn chỉ chấm phần thực sự quan sát, không bắt đủ chiều để công nhận mục tiêu cốt lõi.
+- Build sau đồng bộ mục tiêu/rubric đạt, shell 409.34 kB. Ca xuất bảy giáo án đạt trên Chromium và WebKit; bổ sung assertion đọc trực tiếp mục tiêu/minh chứng cốt lõi trong phiếu 4/4, 5/5 và loại mục tiêu cũ. Không coi WebKit mô phỏng thay Safari/thiết bị trường.
+- Kiểm tra toàn bộ unit test trên worktree hiện tại: **116/116 đạt**; provenance audio vẫn 240/240, không stale/thiếu/hỏng. Phiếu sẵn sàng SOP còn trống thông tin trường, người phụ trách, lịch, thiết bị, duyệt học liệu và quyết định triển khai; chưa có dữ liệu quan sát pilot. Vì vậy chưa hoàn tất mục tiêu triển khai dù các kiểm tra kỹ thuật nêu trên đạt.

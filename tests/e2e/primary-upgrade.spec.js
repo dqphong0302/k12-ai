@@ -2,6 +2,7 @@ import {test,expect} from '@playwright/test'
 import {primaryLessons} from '../../src/content/primaryLessonActivities.js'
 import {primaryAdvancedGames} from '../../src/content/primaryAdvancedGames.js'
 import {primaryActivities} from '../../src/content/primaryActivities.js'
+import {workshopGames} from '../../src/content/primaryWorkshopGames.js'
 
 test('tiểu học chuyển minh chứng sang máy giáo viên độc lập và không nhập trùng',async({page,browser})=>{
   const errors=[];page.on('pageerror',error=>errors.push(error.message))
@@ -123,7 +124,8 @@ for(const [grade,games] of Object.entries(primaryAdvancedGames))test(`lớp ${gr
   await page.goto('/tieu-hoc')
   await page.locator(`#grade-${grade}`).click()
   for(const original of games){
-    const game=primaryActivities[grade].find(item=>item.id===original.id)
+    const card=primaryActivities[grade].find(item=>item.id===original.id)
+    const game=card.type==='workshop'?{...card,...workshopGames[card.id]}:card
     await page.locator(`#game-${grade}-${game.id}`).click()
     await page.locator('#close-game').waitFor()
     if(game.type==='challenge'){

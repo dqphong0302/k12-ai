@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
+import { primaryActivities } from '../../src/content/primaryActivities.js'
 
 test.beforeEach(async({page})=>{
   await page.goto('/tieu-hoc')
@@ -174,10 +175,10 @@ test('giáo viên xuất gói chuẩn bị bài offline có tài nguyên và phi
   expect(html).not.toContain('Tên học sinh')
 })
 
-test('năm giáo án pilot hiện trong TeacherDock và xuất đủ phân loại, kịch bản',async({page},testInfo)=>{
+test('bảy giáo án pilot hiện trong TeacherDock và xuất đủ phân loại, kịch bản',async({page},testInfo)=>{
   const errors=[];page.on('pageerror',error=>errors.push(error.message))
   await page.locator('#teacher-tools').click()
-  for(const [grade,lesson] of [[1,7],[2,10],[3,3],[4,5],[5,6]]){
+  for(const [grade,lesson] of [[1,7],[2,10],[3,3],[4,5],[5,6],[4,4],[5,5]]){
     await page.locator('#teacher-grade-select').selectOption(String(grade))
     await page.locator('#teacher-activity-select').selectOption(`primary-${grade}-${lesson}`)
     const card=page.locator('.teacher-activity')
@@ -198,6 +199,16 @@ test('năm giáo án pilot hiện trong TeacherDock và xuất đủ phân loạ
     const worksheet=await pendingWorksheet,worksheetStream=await worksheet.createReadStream(),worksheetChunks=[]
     for await(const chunk of worksheetStream)worksheetChunks.push(chunk)
     const worksheetHtml=Buffer.concat(worksheetChunks).toString('utf8')
+    if(grade===4&&lesson===4){
+      expect(worksheetHtml).toContain('Em nêu được ứng dụng AI trong học tập và đời sống gần gũi ở Việt Nam.')
+      expect(worksheetHtml).not.toContain('Em sẽ sửa lỗi và giải thích nguyên nhân có thể.')
+      expect(worksheetHtml).toContain('Nêu một ứng dụng AI, ai dùng và công việc được hỗ trợ')
+    }
+    if(grade===5&&lesson===5){
+      expect(worksheetHtml).toContain('Em thực hiện được thao tác cơ bản trên công cụ học máy trực quan có giám sát.')
+      expect(worksheetHtml).not.toContain('Em sẽ thử mẫu mới, lưu kết quả.')
+      expect(worksheetHtml).toContain('Tự chọn mẫu, chọn hoặc sửa nhãn trên công cụ thật')
+    }
     expect(worksheetHtml).not.toContain('Đáp án/gợi ý')
     expect(worksheetHtml).not.toContain('28–33 phút')
     const preview=await page.context().newPage()
@@ -208,7 +219,7 @@ test('năm giáo án pilot hiện trong TeacherDock và xuất đủ phân loạ
     await expect(preview.getByRole('heading',{level:1})).toBeVisible()
     await expect(preview.getByText('Nhận thẻ, đồ dùng hoặc nhiệm vụ từ giáo viên',{exact:false})).toBeVisible()
     expect(await preview.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true)
-    await preview.screenshot({path:testInfo.outputPath(`pilot-grade-${grade}-print.png`),fullPage:true})
+    await preview.screenshot({path:testInfo.outputPath(`pilot-grade-${grade}-lesson-${lesson}-print.png`),fullPage:true})
     await preview.setContent(html)
     await expect(preview.getByRole('heading',{name:'Hướng dẫn giáo viên',exact:true})).toBeHidden()
     await expect(preview.getByRole('heading',{level:1}).last()).toBeVisible()
@@ -222,8 +233,8 @@ test('năm giáo án pilot hiện trong TeacherDock và xuất đủ phân loạ
 })
 
 test('robot lớp 1 dự đoán, chạy từng bước, bỏ lệnh sai và lưu đường chạy',async({page})=>{
-  await page.goto('/#activity=bobo-first-code')
-  await expect(page.getByRole('dialog',{name:'Robot tìm đường bằng block'})).toBeVisible()
+  await page.goto('/tieu-hoc#activity=bobo-first-code')
+  await expect(page.getByRole('dialog',{name:'Robot tìm 12 ngôi sao'})).toBeVisible()
   await page.locator('#code-block-right2').click()
   await page.locator('#code-block-right').click()
   await page.locator('#predict-cell-3-0').focus()
@@ -237,6 +248,22 @@ test('robot lớp 1 dự đoán, chạy từng bước, bỏ lệnh sai và lưu
   await page.locator('#predict-cell-2-1').focus()
   await page.keyboard.press('Enter')
   for(let step=0;step<3;step++)await page.locator('#code-step').click()
+  await page.locator('#next-maze-level').click()
+  const game=primaryActivities[1].find(item=>item.id==='bobo-first-code')
+  for(const level of game.levels.slice(1)){
+    const blocks=[]
+    for(const [delta,positive,negative] of [[level.goal[0]-level.start[0],'right','left'],[level.goal[1]-level.start[1],'down','up']]){
+      const direction=delta>=0?positive:negative
+      let remaining=Math.abs(delta)
+      while(remaining>=2&&level.palette.includes(`${direction}2`)){blocks.push(`${direction}2`);remaining-=2}
+      while(remaining-->0)blocks.push(direction)
+    }
+    for(const block of blocks)await page.locator(`#code-block-${block}`).click()
+    await page.locator(`#predict-cell-${level.goal[0]}-${level.goal[1]}`).click()
+    const steps=blocks.reduce((sum,block)=>sum+(block.endsWith('2')?2:1),0)
+    for(let step=0;step<steps;step++)await page.locator('#code-step').click()
+    await page.locator('#next-maze-level').click()
+  }
   await expect(page.getByText('HOÀN THÀNH THỬ THÁCH')).toBeVisible()
   await page.locator('#game-finish').click()
   await page.locator('#teacher-tools').click()
@@ -247,8 +274,9 @@ test('robot lớp 1 dự đoán, chạy từng bước, bỏ lệnh sai và lưu
   await expect(page.locator('.teacher-observation')).toContainText('không thu âm học sinh')
   await page.locator('.teacher-artifact summary').click()
   const artifact=JSON.parse(await page.locator('#teacher-artifact').textContent())
-  expect(artifact).toMatchObject({program:['right2','down'],predictedDestination:[2,1],predictionMatched:true,executionMode:'step-by-step',runs:2,removedBlocks:['right']})
-  expect(artifact.positions).toEqual([[0,0],[1,0],[2,0],[2,1]])
+  expect(artifact).toMatchObject({completedLevels:12,mistakes:1})
+  expect(artifact.levels[0]).toMatchObject({program:['right2','down'],position:[2,1],executionMode:'step-by-step'})
+  expect(artifact.levels[0].positions).toEqual([[0,0],[1,0],[2,0],[2,1]])
 })
 
 test('lớp 3 kiểm chứng bằng nội dung đoạn nguồn thay vì tên nguồn',async({page})=>{
@@ -970,7 +998,7 @@ test('từ chối quyền camera vẫn có phương án ảnh mẫu cục bộ',
   await page.addInitScript(()=>{
     navigator.mediaDevices.getUserMedia=async()=>{throw new DOMException('permission denied','NotAllowedError')}
   })
-  await page.reload()
+  await page.goto('/kham-pha')
   await page.locator('#try-camera').click()
   await page.locator('#open-camera').click()
   await expect(page.getByRole('alert')).toContainText('Camera chưa được cấp quyền')
@@ -989,6 +1017,9 @@ test('từ chối quyền camera vẫn có phương án ảnh mẫu cục bộ',
   if(browserName==='chromium'){
     await page.evaluate(()=>navigator.serviceWorker.ready)
     await page.locator('#close-lab').click()
+    await page.locator('#teacher-tools').click()
+    await expect(page.locator('#run-device-check')).toBeVisible()
+    await page.locator('.teacher-close').click()
     await context.setOffline(true)
     await page.reload()
     await page.locator('#try-camera').click()
