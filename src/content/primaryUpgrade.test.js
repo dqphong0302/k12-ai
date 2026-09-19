@@ -46,6 +46,15 @@ test('60 bài riêng, mã chuẩn tồn tại, đủ 8 trò mỗi lớp và ản
   for(const game of Object.values(primaryAdvancedGames).flat())assert.ok(existsSync(new URL(`../../public${game.image}`,import.meta.url)),game.image)
 })
 
+test('bài cảm xúc lớp 1 không nhầm tên nhân vật với AI',()=>{
+  for(const lesson of primaryLessons.filter(item=>item.grade===1&&item.content.gameId==='emotion-detective')){
+    const content=getLessonContent(lesson)
+    assert.ok(!getLessonNarrations(content).some(part=>/\bMai\b/i.test(part)),lesson.id)
+  }
+  const game=primaryActivities[1].find(item=>item.id==='emotion-detective')
+  assert.ok(!game.items.some(item=>/\bMai\b/i.test(item.label)))
+})
+
 test('tình huống đang sử dụng chặn sai, giữ lời giải, khôi phục và hoàn thành',()=>{
   const prompts=new Set()
   const active=Object.values(primaryActivities).flat().filter(g=>g.type==='challenge')

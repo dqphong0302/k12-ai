@@ -35,7 +35,7 @@ const rawActivities = {
       {icon:'😮',label:'An ngạc nhiên khi thấy cầu vồng',group:0},
       {icon:'😨',label:'Bình sợ khi nghe tiếng sấm lớn',group:0},
       {icon:'🖥️',label:'Màn hình robot hiện khuôn mặt buồn khi pin yếu',group:1},
-      {icon:'🤗',label:'Mai thấy nhẹ nhõm khi được cô giáo lắng nghe',group:0},
+      {icon:'🤗',label:'Một bạn nhỏ thấy nhẹ nhõm khi được cô giáo lắng nghe',group:0},
       {icon:'🎮',label:'Nhân vật máy nhảy vui theo lệnh của trò chơi',group:1},
       {icon:'🤖',label:'Robot rung đèn tim khi pin vừa sạc đầy',group:1},
       {icon:'🖥️',label:'Màn hình đổi sang mặt lo lắng khi gặp lỗi',group:1},
