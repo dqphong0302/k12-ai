@@ -1056,6 +1056,8 @@ test('audio bài đã nghe phát lại được sau reload offline',async({page,
   test.setTimeout(60000)
   test.skip(browserName==='webkit','Playwright WebKit lỗi nội bộ khi kết hợp service worker và setOffline; kiểm Safari offline trên thiết bị thật trước pilot.')
   await page.evaluate(()=>navigator.serviceWorker.ready)
+  await page.reload()
+  await expect.poll(()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller))).toBe(true)
   await page.locator('#lesson-1-1').click()
   await page.locator('#lesson-listen').click()
   await expect(page.locator('#lesson-listen')).toContainText('Tạm dừng',{timeout:15000})

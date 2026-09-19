@@ -1,4 +1,4 @@
-const VERSION='bobo-k12-2026.09.19.1'
+const VERSION='bobo-k12-2026.09.19.2'
 const SHELL=`${VERSION}-shell`
 const RUNTIME=`${VERSION}-runtime`
 const CORE=['/','/manifest.webmanifest','/bobo-icon.svg']

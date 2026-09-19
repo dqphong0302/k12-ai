@@ -34,8 +34,9 @@ export function getTheoryNarrationFrames(content) {
   const concept = content.explanation.charAt(0).toLowerCase() + content.explanation.slice(1)
   const mechanism = content.mechanism.charAt(0).toLowerCase() + content.mechanism.slice(1)
   const practice = content.practice.charAt(0).toLowerCase() + content.practice.slice(1)
+  const title = content.title.startsWith('AI') ? content.title : content.title.charAt(0).toLowerCase() + content.title.slice(1)
   return [
-    { label: 'Mở đầu', text: `Chào em! Hôm nay cô trò mình cùng khám phá ${content.title.toLowerCase()}.` },
+    { label: 'Mở đầu', text: `Chào em! Hôm nay cô trò mình cùng khám phá ${title.replace(/[.!?]+$/, '')}.` },
     { label: 'Tình huống', text: `Em thử hình dung tình huống này nhé. ${content.example}` },
     { label: 'Kiến thức', text: `Qua đó, mình thấy rằng ${concept}` },
     { label: 'Vì sao?', text: `Điều quan trọng tiếp theo là ${mechanism}` },

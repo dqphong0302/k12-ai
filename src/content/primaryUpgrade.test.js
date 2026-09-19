@@ -35,6 +35,7 @@ test('60 bài riêng, mã chuẩn tồn tại, đủ 8 trò mỗi lớp và ản
     for(const point of presented.theoryPoints)assert.ok(point.length<=200,`${l.id}: ý lý thuyết quá dài`)
     assert.equal(presented.theoryStoryboard.length,7,`${l.id}: số cảnh lý thuyết`)
     assert.equal(presented.theoryStoryboard.map(frame=>frame.text).join(' '),getLessonNarrations(presented)[0],`${l.id}: slide phải khớp lời đọc`)
+    if (presented.title.includes('AI')) assert.ok(presented.theoryStoryboard[0].text.includes('AI'),`${l.id}: tên bài trên slide không được đổi AI thành ai`)
   }
   assert.equal(theoryVisuals.size,50,'Tiểu học phải dùng đúng 50 ảnh lý thuyết')
   for(let grade=1;grade<=5;grade++)assert.equal(primaryActivities[grade].length,8)
