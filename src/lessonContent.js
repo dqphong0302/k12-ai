@@ -28,13 +28,17 @@ const theorySentences = text => {
   return sentences
 }
 
+const lowerSentenceStart = value => /^AI(?=$|[^\p{L}\p{N}])/u.test(value)
+  ? value
+  : value.charAt(0).toLowerCase() + value.slice(1)
+
 const visualSlotByLesson = [1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 10, 10]
 
 export function getTheoryNarrationFrames(content) {
-  const concept = content.explanation.charAt(0).toLowerCase() + content.explanation.slice(1)
-  const mechanism = content.mechanism.charAt(0).toLowerCase() + content.mechanism.slice(1)
-  const practice = content.practice.charAt(0).toLowerCase() + content.practice.slice(1)
-  const title = content.title.startsWith('AI') ? content.title : content.title.charAt(0).toLowerCase() + content.title.slice(1)
+  const concept = lowerSentenceStart(content.explanation)
+  const mechanism = lowerSentenceStart(content.mechanism)
+  const practice = lowerSentenceStart(content.practice)
+  const title = lowerSentenceStart(content.title)
   return [
     { label: 'Mở đầu', text: `Chào em! Hôm nay cô trò mình cùng khám phá ${title.replace(/[.!?]+$/, '')}.` },
     { label: 'Tình huống', text: `Em thử hình dung tình huống này nhé. ${content.example}` },
@@ -72,7 +76,7 @@ export function getLessonContent({ grade, index, title }) {
     standards: detail.standards,
     gameId: detail.gameId,
     extraGameIds: primaryLessonExtraGames[grade]?.[index] || [],
-    goal: `Em sẽ ${detail.steps[2].charAt(0).toLowerCase()+detail.steps[2].slice(1)}.`,
+    goal: `Em sẽ ${lowerSentenceStart(detail.steps[2])}.`,
     explanation: detail.focus,
     theoryPoints,
     example: detail.example,
@@ -101,7 +105,7 @@ export function getLessonNarrations(content) {
   }
   return [
     getTheoryNarrationFrames(content).map(frame => frame.text).join(' '),
-    `Bây giờ cô mời em cùng làm một thử thách nhỏ. Trước hết, ${content.steps[0].charAt(0).toLowerCase() + content.steps[0].slice(1)} Sau đó, ${content.steps[1].charAt(0).toLowerCase() + content.steps[1].slice(1)} Cuối cùng, ${content.steps[2].charAt(0).toLowerCase() + content.steps[2].slice(1)} Em cứ làm chậm rãi, nói thành lời điều mình quan sát được, rồi tự hỏi vì sao kết quả lại như vậy. Nếu chưa chắc, em có thể thử thêm một ví dụ khác.`,
+    `Bây giờ cô mời em cùng làm một thử thách nhỏ. Trước hết, ${lowerSentenceStart(content.steps[0])} Sau đó, ${lowerSentenceStart(content.steps[1])} Cuối cùng, ${lowerSentenceStart(content.steps[2])} Em cứ làm chậm rãi, nói thành lời điều mình quan sát được, rồi tự hỏi vì sao kết quả lại như vậy. Nếu chưa chắc, em có thể thử thêm một ví dụ khác.`,
     `Bây giờ em hãy nhìn bức tranh như một nhà thám tử nhỏ. Đừng vội đoán ngay; mình quan sát từ trái sang phải, tìm con người, thiết bị và những dữ liệu đang xuất hiện. ${visualHints[content.code]} Sau đó, em thử trả lời bằng một câu đầy đủ và chỉ vào chi tiết trong hình giúp em nghĩ như vậy. Không sao nếu câu trả lời đầu tiên chưa đúng, vì quan sát kỹ và sửa lại cũng là một cách học rất tốt.`,
     `Bây giờ em hãy suy nghĩ về câu hỏi: ${content.quiz.question} Các lựa chọn là: ${content.quiz.options.map((option,index)=>`${String.fromCharCode(65+index)}. ${option}`).join('. ')} Em chọn phương án phù hợp và nêu lý do. Nếu chưa đúng, em xem lại tình huống rồi thử tiếp nhé.`
   ]

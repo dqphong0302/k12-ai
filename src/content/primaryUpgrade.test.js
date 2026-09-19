@@ -12,6 +12,7 @@ const withMechanic=game=>({...game,...workshopGames[game.id]})
 import {getGameEngine} from '../engines/index.js'
 import {primaryWorkshopEngine as workshop,workshopReady} from '../engines/primaryWorkshopEngine.js'
 import {getLessonContent,getLessonNarrations} from '../lessonContent.js'
+import {normalizeTtsPronunciation} from '../ttsPronunciation.js'
 import {countDecisionPoints,scoreForMistakes} from '../runtime/activityRuntime.js'
 
 test('60 bài riêng, mã chuẩn tồn tại, đủ 8 trò mỗi lớp và ảnh',()=>{
@@ -53,6 +54,21 @@ test('bài cảm xúc lớp 1 không nhầm tên nhân vật với AI',()=>{
   }
   const game=primaryActivities[1].find(item=>item.id==='emotion-detective')
   assert.ok(!game.items.some(item=>/\bMai\b/i.test(item.label)))
+})
+
+test('60 tiết giữ đúng chữ AI trên slide và đọc thành ây ai',()=>{
+  const countByGrade={}
+  for(const lesson of primaryLessons){
+    const content=getLessonContent(lesson)
+    const displayed=JSON.stringify(content)
+    const narration=getLessonNarrations(content).join(' ')
+    const spoken=normalizeTtsPronunciation(narration)
+    countByGrade[lesson.grade]=(countByGrade[lesson.grade]||0)+1
+    assert.ok(!/(^|[^\p{L}\p{N}])aI(?=$|[^\p{L}\p{N}])/u.test(displayed),`${lesson.id}: có chữ aI sai trên slide`)
+    assert.ok(!/(^|[^\p{L}\p{N}])aI(?=$|[^\p{L}\p{N}])/u.test(narration),`${lesson.id}: có chữ aI sai trong lời đọc`)
+    assert.ok(!/(^|[^\p{L}\p{N}])AI(?=$|[^\p{L}\p{N}])/u.test(spoken),`${lesson.id}: TTS chưa đổi AI thành ây ai`)
+  }
+  assert.deepEqual(countByGrade,{1:12,2:12,3:12,4:12,5:12})
 })
 
 test('tình huống đang sử dụng chặn sai, giữ lời giải, khôi phục và hoàn thành',()=>{

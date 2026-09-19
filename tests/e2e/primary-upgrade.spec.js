@@ -4,6 +4,40 @@ import {primaryAdvancedGames} from '../../src/content/primaryAdvancedGames.js'
 import {primaryActivities} from '../../src/content/primaryActivities.js'
 import {workshopGames} from '../../src/content/primaryWorkshopGames.js'
 
+test('THCS và THPT được làm mờ, khóa và không điều hướng',async({page})=>{
+  await page.goto('/')
+  for(const id of ['middle','high']){
+    const card=page.locator(`.${id}-level`)
+    const button=page.locator(`#preview-${id}`)
+    await expect(card).toHaveAttribute('aria-disabled','true')
+    await expect(button).toBeDisabled()
+    await expect(button).not.toHaveAttribute('href',/.+/)
+    expect(Number(await card.evaluate(element=>getComputedStyle(element).opacity))).toBeLessThan(1)
+  }
+  for(const id of ['middle','high']){
+    await expect(page.locator(`#nav-${id}`)).toHaveAttribute('aria-disabled','true')
+    await expect(page.locator(`#nav-${id}`)).not.toHaveAttribute('href',/.+/)
+  }
+})
+
+test('layout lý thuyết ổn định ở mobile, tablet và desktop',async({page})=>{
+  for(const viewport of [{width:390,height:844},{width:768,height:1024},{width:1440,height:900}]){
+    await page.setViewportSize(viewport)
+    await page.goto('/tieu-hoc')
+    await page.locator('#lesson-1-1').click()
+    await expect(page.locator('.theory-story-stage')).toBeVisible()
+    await expect(page.locator('.theory-story-timeline button')).toHaveCount(7)
+    await expect(page.locator('#quick-lab-jump')).toHaveCount(1)
+    expect(await page.locator('.lesson-modal').evaluate(element=>element.scrollWidth<=element.clientWidth+1)).toBe(true)
+    expect(await page.locator('.theory-story-stage').evaluate(element=>element.scrollWidth<=element.clientWidth+1)).toBe(true)
+    const caption=await page.locator('.theory-story-caption').boundingBox()
+    const stage=await page.locator('.theory-story-stage').boundingBox()
+    expect(caption.y+caption.height).toBeLessThanOrEqual(stage.y+stage.height+1)
+    await page.screenshot({path:`test-results/theory-layout-${viewport.width}.png`,fullPage:false})
+    await page.locator('#close-lesson').click()
+  }
+})
+
 test('tiểu học chuyển minh chứng sang máy giáo viên độc lập và không nhập trùng',async({page,browser})=>{
   const errors=[];page.on('pageerror',error=>errors.push(error.message))
   await page.goto('/tieu-hoc')
