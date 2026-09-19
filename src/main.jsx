@@ -791,10 +791,40 @@ function explainMechanicFeedback(game, feedback) {
   return 'Thử từng lựa chọn, quan sát kết quả rồi nêu lý do của em.'
 }
 
+function TheoryStoryPlayer({ content, speech }) {
+  const frames = content.theoryStoryboard
+  const [active, setActive] = useState(0)
+  const totalWeight = frames.reduce((sum, frame) => sum + frame.text.length, 0)
+  const starts = useMemo(() => frames.map((_, index) => frames.slice(0, index).reduce((sum, frame) => sum + frame.text.length, 0) / totalWeight), [frames, totalWeight])
+
+  useEffect(() => {
+    if (speech.status !== 'speaking') return
+    const next = starts.findLastIndex(start => speech.progress >= start)
+    setActive(Math.max(0, next))
+  }, [speech.progress, speech.status, starts])
+
+  const frame = frames[active]
+  return <div className="theory-story" aria-live="polite">
+    <div className="theory-story-stage">
+      <img key={`${active}-${frame.image}`} src={frame.image} alt="" />
+      <div className="theory-story-shade"/>
+      <div key={`caption-${active}`} className="theory-story-caption">
+        <small>{frame.label} · {active + 1}/{frames.length}</small>
+        <p>{highlightPrimaryKeywords(frame.text)}</p>
+      </div>
+      {speech.status === 'speaking' && <span className="theory-story-playing"><Volume2 size={14}/> Đang kể chuyện</span>}
+      <span className="theory-story-progress" style={{ width: `${speech.progress * 100}%` }}/>
+    </div>
+    <div className="theory-story-timeline" aria-label="Các cảnh lý thuyết">
+      {frames.map((item, index) => <button key={`${item.label}-${index}`} type="button" className={index === active ? 'active' : ''} aria-label={`Xem cảnh ${index + 1}: ${item.label}`} onClick={() => { setActive(index); speech.seek(starts[index]) }}><span>{index + 1}</span><b>{item.label}</b></button>)}
+    </div>
+  </div>
+}
+
 function LessonModal({ lesson, done, onComplete, close, openGame }) {
   const settings = useLearningSettings()
   const [fullscreen, setFullscreen] = useState(false)
-  const content = getLessonContent(lesson)
+  const content = useMemo(() => getLessonContent(lesson), [lesson])
   const stationIds = [content.gameId, ...content.extraGameIds]
   const stations = stationIds.map(id => interactiveGames[content.grade]?.find(item=>item.id===id)).filter(Boolean)
   const [answer, setAnswer] = useState(null)
@@ -877,7 +907,7 @@ function LessonModal({ lesson, done, onComplete, close, openGame }) {
       {speech.status === 'error' && <p className="speech-error">Chưa tải được audio bài học. Em hãy kiểm tra kết nối rồi thử lại.</p>}
       <nav className="slide-nav" aria-label="Các phần của bài học">{slideMeta.map(({ label, icon: Icon }, i) => <button id={`lesson-slide-${i}`} key={label} className={slide === i ? 'active' : ''} disabled={i > unlocked} onClick={() => changeSlide(i)}><span>{i < unlocked || finished ? <Check size={15}/> : <Icon size={15}/>}</span>{label}</button>)}</nav>
       <div className="lesson-slide" key={slide}>
-        {slide === 0 && <section className="theory-slide"><div className="theory-action-callout"><div className="callout-lead"><Zap size={18}/><span><b>Học qua trải nghiệm thực hành:</b> Quan sát luồng hoạt động trực quan hoặc vào trạm tương tác ngay!</span></div><div className="callout-actions"><button id="quick-visual-jump" type="button" className="callout-quick-btn" onClick={next}><Presentation size={15}/> Xem slide trực quan <ArrowRight size={15}/></button>{openGame && stations.map((station, stationIndex) => <button id={stationIndex ? `quick-lab-jump-${stationIndex}` : 'quick-lab-jump'} key={station.id} type="button" className="callout-lab-btn" onClick={() => { closeLesson(); openGame({ ...station, grade: content.grade, color: content.color, extended:content.grade===1 }) }}><Sparkles size={15}/> Mở trạm thực hành {station.title} <ArrowRight size={15}/></button>)}</div></div><div className="lesson-section-title"><BookOpen/><div><small>PHẦN 1 · LÝ THUYẾT TINH GỌN</small><h3>Khám phá kiến thức mới</h3></div></div><div className="theory-list">{content.theoryPoints.map((point, i) => <article key={point}><span>{i + 1}</span><p>{highlightPrimaryKeywords(point)}</p></article>)}</div><div className="theory-support"><article className="example-card"><Sparkles/><div><b>Tình huống thực tế</b><p>{highlightPrimaryKeywords(content.example)}</p></div></article><article className="think-card"><Eye/><div><b>Em thử nghĩ</b><p>{highlightPrimaryKeywords(content.thinkQuestion)}</p></div></article></div><aside className="remember-box"><Lightbulb/><p><b>Ghi nhớ:</b> {content.remember}</p></aside></section>}
+        {slide === 0 && <section className="theory-slide"><div className="theory-action-callout"><div className="callout-lead"><Zap size={18}/><span><b>Học như xem một video:</b> Bật lời kể để hình và ý chính tự chuyển theo.</span></div><div className="callout-actions"><button id="quick-visual-jump" type="button" className="callout-quick-btn" onClick={next}><Presentation size={15}/> Xem sơ đồ <ArrowRight size={15}/></button>{openGame && stations.map((station, stationIndex) => <button id={stationIndex ? `quick-lab-jump-${stationIndex}` : 'quick-lab-jump'} key={station.id} type="button" className="callout-lab-btn" onClick={() => { closeLesson(); openGame({ ...station, grade: content.grade, color: content.color, extended:content.grade===1 }) }}><Sparkles size={15}/> Mở trạm {station.title} <ArrowRight size={15}/></button>)}</div></div><div className="lesson-section-title"><BookOpen/><div><small>PHẦN 1 · CHUYỆN TRANH CÓ LỜI KỂ</small><h3>Khám phá kiến thức mới</h3></div></div><TheoryStoryPlayer content={content} speech={speech}/><div className="theory-support theory-story-prompt"><article className="think-card"><Eye/><div><b>Em thử nghĩ</b><p>{highlightPrimaryKeywords(content.thinkQuestion)}</p></div></article></div></section>}
         {slide === 1 && <section className="visual-slide"><div className="lesson-section-title"><Presentation/><div><small>PHẦN 2 · SLIDE TRỰC QUAN</small><h3>Từ ý tưởng đến hành động</h3></div></div><div className="slide-canvas"><div className="slide-bobo"><Bot/><span>Bo-Bo</span></div>{content.steps.map((step, i) => <React.Fragment key={step}><article><span>{i + 1}</span><p>{step}</p></article>{i < 2 && <ArrowRight className="flow-arrow"/>}</React.Fragment>)}</div><p className="slide-caption">Quan sát dòng chảy từ trái sang phải và kể lại bằng lời của em.</p></section>}
         {slide === 2 && <section className="illustration-slide"><div className="lesson-section-title"><Images/><div><small>PHẦN 3 · HÌNH ẢNH MINH HỌA</small><h3>Quan sát thật kỹ nhé!</h3></div></div><figure><img src={content.illustration} alt={`Minh họa chặng ${content.stage} môn AI lớp ${content.grade}: ${content.name}`}/><figcaption><Eye size={19}/><div><b>Câu hỏi quan sát</b><p>{content.observe}</p></div></figcaption></figure></section>}
         {slide === 3 && <section className="lesson-check"><small>PHẦN 4 · TRẮC NGHIỆM</small><h3>{content.quiz.question}</h3><div className="answer-list">{content.quiz.options.map((option, i) => <button id={`lesson-answer-${i}`} className={answer === i ? (correct ? 'answer selected correct' : 'answer selected wrong') : 'answer'} key={option} onClick={() => handleSelectAnswer(i)}><span>{String.fromCharCode(65 + i)}</span>{option}{answer === i && correct && <Check size={18}/>}</button>)}</div>{answer !== null && <p className={correct ? 'quiz-feedback correct' : 'quiz-feedback'}>{correct ? `Chính xác! ${content.quiz.explanation}` : 'Chưa đúng rồi. Em xem lại các slide rồi thử lần nữa nhé!'}</p>}</section>}

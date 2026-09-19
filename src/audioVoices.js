@@ -22,16 +22,16 @@ export const vieneuVoiceCatalog = [
   { id: 'vieneu-ngoctran', voice: 'Ngọc Trân', gender: 'female', language: 'vi', style: 'natural' }
 ]
 
-// Ba preset dưới đây mô tả đúng các MP3 đang đóng gói theo cấp học.
+// Ba preset dưới đây mô tả đúng các tệp Opus đang đóng gói theo cấp học.
 export const lessonAudioVoices = {
-  primary: { label: 'Tiểu học', voice: 'Trúc Ly', id: 'vieneu-trucly', style: 'tươi sáng', speed: 1.05, model: 'tts-1-hd', sample:'/audio/lessons/grade-1/lesson-01/part-1-theory.mp3' },
-  middle: { label: 'THCS', voice: 'Ngọc Huyền', id: 'vieneu-ngochuyen', style: 'tự nhiên', speed: 1.03, model: 'tts-1-hd', sample:'/audio/middle/grade-6/lesson-01/part-1.mp3' },
-  high: { label: 'THPT', voice: 'Minh Đức', id: 'vieneu-minhduc', style: 'rõ ràng', speed: 1.02, model: 'tts-1-hd', sample:'/audio/high/grade-10/lesson-01/part-1.mp3' }
+  primary: { label: 'Tiểu học', voice: 'Trúc Ly', id: 'vieneu-trucly', style: 'tươi sáng', speed: 1.05, model: 'tts-1-hd', sample:'/audio/lessons/grade-1/lesson-01/part-1-theory.opus' },
+  middle: { label: 'THCS', voice: 'Ngọc Huyền', id: 'vieneu-ngochuyen', style: 'tự nhiên', speed: 1.03, model: 'tts-1-hd', sample:'/audio/middle/grade-6/lesson-01/part-1.opus' },
+  high: { label: 'THPT', voice: 'Minh Đức', id: 'vieneu-minhduc', style: 'rõ ràng', speed: 1.02, model: 'tts-1-hd', sample:'/audio/high/grade-10/lesson-01/part-1.opus' }
 }
 
 export function lessonAudioVoiceLabel(scope) {
   const item = lessonAudioVoices[scope]
-  return item ? `Preset MP3: ${item.voice} · VieNeu · ${item.style} · ${item.speed.toFixed(2).replace('.', ',')}×` : ''
+  return item ? `Preset Opus: ${item.voice} · VieNeu · ${item.style} · ${item.speed.toFixed(2).replace('.', ',')}×` : ''
 }
 
 export function voicePresetSignature(item) {

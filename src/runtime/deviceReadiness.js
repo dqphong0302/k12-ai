@@ -14,7 +14,7 @@ export async function markOfflineResourceReady(resource,cacheStorage=globalThis.
 
 export function summarizeOfflineResources(urls=[]) {
   const paths=urls.map(value=>{try{return new URL(value,'https://local.invalid').pathname}catch{return ''}})
-  const audioFiles=new Set(paths.filter(path=>path.startsWith('/audio/')&&path.endsWith('.mp3')))
+  const audioFiles=new Set(paths.filter(path=>path.startsWith('/audio/')&&path.endsWith('.opus')))
   return {
     mobileNetReady:paths.includes(`${readinessMarkerPrefix}mobilenet`),
     audioFileCount:audioFiles.size
@@ -63,7 +63,7 @@ export function collectModelBenchmarks(records) {
 }
 
 export function assessDeviceReadiness(capabilities) {
-  const required={indexedDb:'IndexedDB',storage:'bộ nhớ cục bộ',serviceWorker:'offline shell',audioMp3:'audio MP3',secureContext:'ngữ cảnh bảo mật'}
+  const required={indexedDb:'IndexedDB',storage:'bộ nhớ cục bộ',serviceWorker:'offline shell',audioOpus:'audio Opus',secureContext:'ngữ cảnh bảo mật'}
   const blockers=Object.entries(required).filter(([key])=>!capabilities[key]).map(([,label])=>label)
   const warnings=[]
   if(!capabilities.webgl)warnings.push('Không có WebGL; lab ML nhỏ sẽ dùng CPU.')

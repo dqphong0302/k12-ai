@@ -10,6 +10,7 @@ import { getMiddleLessonAudioPath, getMiddleLessonNarrations, middleLessonUnits,
 import { getHighLessons } from '../src/highSchoolContent.js'
 import { getHighLessonAudioPath, getHighLessonNarrations } from '../src/highNarration.js'
 import { lessonAudioVoices } from '../src/audioVoices.js'
+import { normalizeTtsPronunciation } from '../src/ttsPronunciation.js'
 
 const scope = process.env.TTS_SCOPE || 'primary'
 const scopeDefaults = {
@@ -93,11 +94,11 @@ async function alreadyGenerated(path) {
   try { return (await stat(path)).size > 1024 } catch { return false }
 }
 
-function wavToMp3(wav, filter = '') {
+function encodeToOpus(audio, filter = '') {
   return new Promise((resolve, reject) => {
     const args=['-loglevel','error','-i','pipe:0']
     if(filter)args.push('-af',filter)
-    args.push('-codec:a','libmp3lame','-b:a','128k','-f','mp3','pipe:1')
+    args.push('-ac','1','-ar','24000','-codec:a','libopus','-b:a','24k','-vbr','on','-compression_level','10','-f','opus','pipe:1')
     const ffmpeg = spawn('ffmpeg', args)
     const output = []
     let error = ''
@@ -105,7 +106,7 @@ function wavToMp3(wav, filter = '') {
     ffmpeg.stderr.on('data', chunk => { error += chunk })
     ffmpeg.on('error', reject)
     ffmpeg.on('close', code => code === 0 ? resolve(Buffer.concat(output)) : reject(new Error(error || `ffmpeg thoát với mã ${code}`)))
-    ffmpeg.stdin.end(wav)
+    ffmpeg.stdin.end(audio)
   })
 }
 
@@ -147,7 +148,7 @@ async function concatMp3(parts) {
   } finally { await rm(directory, { recursive: true, force: true }) }
 }
 
-async function sayToMp3(input) {
+async function sayToOpus(input) {
   const directory=await mkdtemp(join(tmpdir(),'bobo-tts-'))
   const output=join(directory,'speech.aiff')
   try {
@@ -159,7 +160,7 @@ async function sayToMp3(input) {
       command.on('close',code=>code===0?resolve():reject(new Error(error||`say thoát với mã ${code}`)))
     })
     const filter=style==='energetic'?'highpass=f=80,equalizer=f=3000:t=q:w=1:g=2,acompressor=threshold=0.2:ratio=2:attack=20:release=100':''
-    return wavToMp3(await readFile(output),filter)
+    return encodeToOpus(await readFile(output),filter)
   } finally {await rm(directory,{recursive:true,force:true})}
 }
 
@@ -192,8 +193,8 @@ async function requestAudio(input, label) {
   const audioParts = []
   for (let chunkIndex = 0; chunkIndex < remoteChunks.length; chunkIndex += 1) {
   const chunkInput = remoteChunks[chunkIndex]
-  if (localMode) return sayToMp3(input)
-  if (directUrl) return wavToMp3(await postDirect(input))
+  if (localMode) return sayToOpus(input)
+  if (directUrl) return encodeToOpus(await postDirect(input))
   let chunkRequest = remoteChunkCache.get(chunkInput)
   if (!chunkRequest) {
     chunkRequest = (async () => {
@@ -218,11 +219,11 @@ async function requestAudio(input, label) {
   }
   try { audioParts.push(await chunkRequest) } catch (error) {
     remoteChunkCache.delete(chunkInput)
-    if (allowLocalFallback) return sayToMp3(input)
+    if (allowLocalFallback) return sayToOpus(input)
     throw new Error(`${label} · đoạn ${chunkIndex + 1}/${remoteChunks.length}: ${error.message}`)
   }
   }
-  return concatMp3(audioParts)
+  return encodeToOpus(await concatMp3(audioParts))
   })()
   audioCache.set(input, request)
   return request
@@ -230,7 +231,8 @@ async function requestAudio(input, label) {
 
 async function synthesize(job) {
   const relativeOutput = job.output.slice(root.length)
-  const input = job.input.replace(/([.!?…])\s+/g, '$1\n\n')
+  const spokenInput = scope === 'primary' ? normalizeTtsPronunciation(job.input) : job.input
+  const input = spokenInput.replace(/([.!?…])\s+/g, '$1\n\n')
   const inputHash = createHash('sha256').update(input).digest('hex')
   if (resume && completed.has(relativeOutput) && inputHashes[relativeOutput] === inputHash) {
     if (!audioCache.has(input)) audioCache.set(input, readFile(job.output))

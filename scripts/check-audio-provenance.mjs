@@ -7,6 +7,7 @@ import { getMiddleLessonAudioPath, getMiddleLessonNarrations, middleLessonUnits,
 import { getHighLessons } from '../src/highSchoolContent.js'
 import { getHighLessonAudioPath, getHighLessonNarrations } from '../src/highNarration.js'
 import { lessonAudioVoices } from '../src/audioVoices.js'
+import { normalizeTtsPronunciation } from '../src/ttsPronunciation.js'
 
 const root = join(process.cwd(), 'public')
 const requestedScope = process.env.TTS_SCOPE || 'all'
@@ -48,7 +49,8 @@ for (const scope of scopes) {
   const stale = []
   const invalid = []
   for (const job of jobsByScope[scope]) {
-    const input = job.input.replace(/([.!?…])\s+/g, '$1\n\n')
+    const spokenInput = scope === 'primary' ? normalizeTtsPronunciation(job.input) : job.input
+    const input = spokenInput.replace(/([.!?…])\s+/g, '$1\n\n')
     const inputHash = createHash('sha256').update(input).digest('hex')
     const file = join(root, job.path)
     try {

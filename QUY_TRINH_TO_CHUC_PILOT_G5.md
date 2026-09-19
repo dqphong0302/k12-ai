@@ -30,7 +30,7 @@ Chuẩn bị và chạy thử trước ngày dạy; kiểm tra lại trước gi
 1. Mở trình duyệt khi có mạng và truy cập trang web công cụ. Nếu vừa cập nhật phiên bản, nhờ kỹ thuật viên xác nhận service worker mới đã kiểm soát trang, rồi tải lại online trước khi chuẩn bị tài nguyên. Chỉ thấy cache mới xuất hiện chưa đủ; không cập nhật giữa tiết học.
 2. Bấm vào biểu tượng **Teacher Mode** (Góc dưới hoặc nút "Giáo viên").
 3. Bấm nút **"Chạy kiểm tra thiết bị"**:
-   - Xác nhận các mục: *IndexedDB, Bộ nhớ cục bộ, Offline shell, Audio MP3, Ngữ cảnh bảo mật* đều hiển thị **Sẵn sàng**.
+   - Xác nhận các mục: *IndexedDB, Bộ nhớ cục bộ, Offline shell, Audio Opus, Ngữ cảnh bảo mật* đều hiển thị **Sẵn sàng**.
    - Chỉ kiểm tra **MobileNet offline** khi bài dùng nhận diện MobileNet. Nếu hiển thị *Chưa tải*, mở chức năng nhận diện tương ứng và chờ tải xong; lab lá dùng mô hình riêng, không thay cho bước này.
 4. Mở từng bài sẽ dạy, phát đủ các phần audio và chạy thử công cụ/mô hình tương ứng đến khi tải xong. Lab lá không đồng nghĩa đã tải MobileNet; chỉ yêu cầu mô hình mà bài thực sự sử dụng.
 5. Ngắt mạng, tải lại trang rồi mở đúng bài, phát audio, thử hoạt động và kiểm tra lưu tiến độ. Nếu thiếu tài nguyên, kết nối lại để chuẩn bị hoặc dùng phương án giấy; không cam kết offline chỉ dựa vào báo cáo shell.

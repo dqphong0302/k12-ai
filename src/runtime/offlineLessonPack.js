@@ -13,10 +13,10 @@ export function activityAudioResources(activity){
   if(!number)return []
   if(activity.grade<=5){
     const names=['theory','slides','illustration','quiz']
-    return names.map((name,index)=>`/audio/lessons/grade-${activity.grade}/lesson-${number}/part-${index+1}-${name}.mp3`)
+    return names.map((name,index)=>`/audio/lessons/grade-${activity.grade}/lesson-${number}/part-${index+1}-${name}.opus`)
   }
   const level=activity.grade<=9?'middle':'high'
-  return [1,2,3,4].map(part=>`/audio/${level}/grade-${activity.grade}/lesson-${number}/part-${part}.mp3`)
+  return [1,2,3,4].map(part=>`/audio/${level}/grade-${activity.grade}/lesson-${number}/part-${part}.opus`)
 }
 
 export function offlinePackFilename(activity){

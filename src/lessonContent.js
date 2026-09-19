@@ -28,6 +28,23 @@ const theorySentences = text => {
   return sentences
 }
 
+const visualSlotByLesson = [1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 10, 10]
+
+export function getTheoryNarrationFrames(content) {
+  const concept = content.explanation.charAt(0).toLowerCase() + content.explanation.slice(1)
+  const mechanism = content.mechanism.charAt(0).toLowerCase() + content.mechanism.slice(1)
+  const practice = content.practice.charAt(0).toLowerCase() + content.practice.slice(1)
+  return [
+    { label: 'Mở đầu', text: `Chào em! Hôm nay cô trò mình cùng khám phá ${content.title.toLowerCase()}.` },
+    { label: 'Tình huống', text: `Em thử hình dung tình huống này nhé. ${content.example}` },
+    { label: 'Kiến thức', text: `Qua đó, mình thấy rằng ${concept}` },
+    { label: 'Vì sao?', text: `Điều quan trọng tiếp theo là ${mechanism}` },
+    { label: 'Cẩn thận', text: `Tuy vậy, em nhớ rằng ${content.limitation}.` },
+    { label: 'Em thực hành', text: `Vì thế, khi gặp một công cụ thông minh, em hãy ${practice}.` },
+    { label: 'Suy ngẫm', text: 'Trước khi đi tiếp, em thử nghĩ xem mình sẽ hỏi ai hoặc tìm bằng chứng nào để chắc chắn hơn nhé.' }
+  ]
+}
+
 export function getLessonContent({ grade, index, title }) {
   const detail = primaryLessonDetails[grade]?.[index]
   if (!detail) throw new Error(`Thiếu nội dung lớp ${grade}, tiết ${index+1}`)
@@ -40,7 +57,10 @@ export function getLessonContent({ grade, index, title }) {
   const strand = strands.find(item=>item.short===detail.standards.split('.')[1][0])
   const stage = Math.floor(index / 3) + 1
   const meta = strandMeta[strand.code]
-  return {
+  const theoryPoints = theorySentences(detail.focus)
+  const visualSlot = String(visualSlotByLesson[index]).padStart(2, '0')
+  const illustration = `/images/lessons/primary/grade-${grade}/visual-${visualSlot}.webp`
+  const content = {
     ...meta,
     code: strand.code,
     title,
@@ -53,7 +73,7 @@ export function getLessonContent({ grade, index, title }) {
     extraGameIds: primaryLessonExtraGames[grade]?.[index] || [],
     goal: `Em sẽ ${detail.steps[2].charAt(0).toLowerCase()+detail.steps[2].slice(1)}.`,
     explanation: detail.focus,
-    theoryPoints: theorySentences(detail.focus),
+    theoryPoints,
     example: detail.example,
     thinkQuestion: reflection.think,
     mechanism: detail.quiz.explanation,
@@ -61,16 +81,17 @@ export function getLessonContent({ grade, index, title }) {
     practice: detail.steps[2],
     steps: detail.steps,
     quiz: detail.quiz,
-    illustration: `/images/lessons/grade-${grade}-stage-${stage}.webp`,
+    illustration,
     observe: strand.code === 'NLa' ? 'Trong hình, việc nào Bo-Bo có thể hỗ trợ và việc nào chỉ con người mới làm được?' : strand.code === 'NLc' ? 'Bo-Bo đang nhận dữ liệu gì? Điều gì có thể khiến máy nhận biết sai?' : strand.code === 'NLd' ? 'Em hãy chỉ ra dữ liệu, bước thử nghiệm và cách các bạn cải tiến giải pháp.' : 'Các bạn nhỏ đang bảo vệ bản thân và giúp hệ thống công bằng bằng cách nào?',
     remember: reflection.remember
+  }
+  return {
+    ...content,
+    theoryStoryboard: getTheoryNarrationFrames(content).map(frame => ({ ...frame, image: illustration }))
   }
 }
 
 export function getLessonNarrations(content) {
-  const concept = content.explanation.charAt(0).toLowerCase() + content.explanation.slice(1)
-  const mechanism = content.mechanism.charAt(0).toLowerCase() + content.mechanism.slice(1)
-  const practice = content.practice.charAt(0).toLowerCase() + content.practice.slice(1)
   const visualHints = {
     NLa: 'Em hãy tìm nét mặt, hành động của các bạn và xem quyết định nào cần sự quan tâm của con người.',
     NLc: 'Em hãy tìm thiết bị đang nhận dữ liệu, loại tín hiệu đi vào và dấu hiệu có thể làm kết quả thay đổi.',
@@ -78,7 +99,7 @@ export function getLessonNarrations(content) {
     NLb: 'Em hãy tìm dấu hiệu an toàn, cách các bạn bảo vệ nhau và hành động giúp kết quả công bằng hơn.'
   }
   return [
-    `Chào em! Hôm nay cô trò mình cùng khám phá ${content.title.toLowerCase()}. Em thử hình dung tình huống này nhé. ${content.example} Qua đó, mình thấy rằng ${concept} Điều quan trọng tiếp theo là ${mechanism} Tuy vậy, em nhớ rằng ${content.limitation}. Vì thế, khi gặp một công cụ thông minh, em hãy ${practice}. Trước khi đi tiếp, em thử nghĩ xem mình sẽ hỏi ai hoặc tìm bằng chứng nào để chắc chắn hơn nhé.`,
+    getTheoryNarrationFrames(content).map(frame => frame.text).join(' '),
     `Bây giờ cô mời em cùng làm một thử thách nhỏ. Trước hết, ${content.steps[0].charAt(0).toLowerCase() + content.steps[0].slice(1)} Sau đó, ${content.steps[1].charAt(0).toLowerCase() + content.steps[1].slice(1)} Cuối cùng, ${content.steps[2].charAt(0).toLowerCase() + content.steps[2].slice(1)} Em cứ làm chậm rãi, nói thành lời điều mình quan sát được, rồi tự hỏi vì sao kết quả lại như vậy. Nếu chưa chắc, em có thể thử thêm một ví dụ khác.`,
     `Bây giờ em hãy nhìn bức tranh như một nhà thám tử nhỏ. Đừng vội đoán ngay; mình quan sát từ trái sang phải, tìm con người, thiết bị và những dữ liệu đang xuất hiện. ${visualHints[content.code]} Sau đó, em thử trả lời bằng một câu đầy đủ và chỉ vào chi tiết trong hình giúp em nghĩ như vậy. Không sao nếu câu trả lời đầu tiên chưa đúng, vì quan sát kỹ và sửa lại cũng là một cách học rất tốt.`,
     `Bây giờ em hãy suy nghĩ về câu hỏi: ${content.quiz.question} Các lựa chọn là: ${content.quiz.options.map((option,index)=>`${String.fromCharCode(65+index)}. ${option}`).join('. ')} Em chọn phương án phù hợp và nêu lý do. Nếu chưa đúng, em xem lại tình huống rồi thử tiếp nhé.`
@@ -89,5 +110,5 @@ const audioPartNames = ['theory', 'slides', 'illustration', 'quiz']
 
 export function getLessonAudioPath(grade, lessonNumber, part) {
   const lesson = String(lessonNumber).padStart(2, '0')
-  return `/audio/lessons/grade-${grade}/lesson-${lesson}/part-${part + 1}-${audioPartNames[part]}.mp3`
+  return `/audio/lessons/grade-${grade}/lesson-${lesson}/part-${part + 1}-${audioPartNames[part]}.opus`
 }

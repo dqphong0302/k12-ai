@@ -26,7 +26,7 @@ export const middleLessonUnits = {
 export const middleUnitOrder = ['life', 'ml', 'prompt', 'bias']
 
 export function getMiddleLessonAudioPath(grade, lessonNumber, part) {
-  return `/audio/middle/grade-${grade}/lesson-${String(lessonNumber).padStart(2, '0')}/part-${part + 1}.mp3`
+  return `/audio/middle/grade-${grade}/lesson-${String(lessonNumber).padStart(2, '0')}/part-${part + 1}.opus`
 }
 
 export function getMiddleLessonNarrations({ grade, lessonNumber, title, unitId }) {

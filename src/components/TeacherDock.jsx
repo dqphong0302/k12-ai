@@ -23,11 +23,11 @@ function AudioVoiceCatalog() {
     try {localStorage.setItem(storageKey,JSON.stringify(next))} catch {}
   }
   return <section className="teacher-audio-catalog" aria-labelledby="teacher-audio-title">
-    <h3 id="teacher-audio-title">Preset MP3 đang phát hành</h3>
+    <h3 id="teacher-audio-title">Preset Opus đang phát hành</h3>
     <p>VieNeu có {vieneuVoiceCatalog.filter(item=>item.language==='vi').length} giọng Việt. Ba dòng dưới là preset đang đóng gói theo cấp; website phát tệp local để dùng offline.</p>
     <ul>{Object.entries(lessonAudioVoices).map(([scope,item]) => <li key={item.id}><div><b>{item.label}: {item.voice}</b><span>{item.style} · {item.speed.toFixed(2).replace('.', ',')}× · {item.id}</span><label><input id={`voice-review-${scope}`} type="checkbox" checked={Boolean(reviews[scope]?.reviewed&&reviews[scope]?.presetSignature===voicePresetSignature(item))} onChange={event=>review(scope,item,event.target.checked)}/> Đã nghe và phù hợp để pilot</label></div><audio controls preload="none" src={item.sample} aria-label={`Nghe mẫu giọng ${item.voice} cho ${item.label}`}/></li>)}</ul>
     <details className="vieneu-voices"><summary>Catalog VieNeu: {vieneuVoiceCatalog.length} giọng ({vieneuVoiceCatalog.filter(item=>item.language==='vi').length} tiếng Việt)</summary><div>{vieneuVoiceCatalog.map(item=><span key={item.id}><b>{item.voice}</b><small>{item.language==='vi'?'Tiếng Việt':'Tiếng Anh'} · {item.gender==='female'?'nữ':'nam'} · {item.style}</small></span>)}</div></details>
-    <small>Chọn giọng khác bằng <code>TTS_VOICE</code>, tạo lại MP3 và chạy kiểm provenance trước khi phát hành.</small>
+    <small>Chọn giọng khác bằng <code>TTS_VOICE</code>, tạo lại Opus và chạy kiểm provenance trước khi phát hành.</small>
   </section>
 }
 
@@ -54,7 +54,7 @@ async function inspectDeviceReadiness() {
     indexedDb,
     storage,
     serviceWorker:'serviceWorker' in navigator,
-    audioMp3:Boolean(document.createElement('audio').canPlayType('audio/mpeg')),
+    audioOpus:Boolean(document.createElement('audio').canPlayType('audio/ogg; codecs="opus"')),
     secureContext:globalThis.isSecureContext,
     online:navigator.onLine,
     viewport:{width:window.innerWidth,height:window.innerHeight},
@@ -70,7 +70,7 @@ async function inspectDeviceReadiness() {
 function DeviceReadiness() {
   const [result,setResult]=useState(null),[busy,setBusy]=useState(false)
   const run=async()=>{setBusy(true);try{setResult(await inspectDeviceReadiness())}finally{setBusy(false)}}
-  const labels={webgl:'WebGL',camera:'Camera API',indexedDb:'IndexedDB',storage:'Bộ nhớ cục bộ',serviceWorker:'Offline shell',audioMp3:'Audio MP3',secureContext:'Ngữ cảnh bảo mật',online:'Kết nối hiện tại'}
+  const labels={webgl:'WebGL',camera:'Camera API',indexedDb:'IndexedDB',storage:'Bộ nhớ cục bộ',serviceWorker:'Offline shell',audioOpus:'Audio Opus',secureContext:'Ngữ cảnh bảo mật',online:'Kết nối hiện tại'}
   return <section className="device-readiness" aria-labelledby="device-readiness-title">
     <h3 id="device-readiness-title">Kiểm tra thiết bị pilot</h3>
     <p>Chỉ kiểm khả năng trình duyệt, không mở camera và không gửi dữ liệu.</p>

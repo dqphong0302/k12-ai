@@ -1,4 +1,4 @@
-const VERSION='bobo-k12-2026.09.16.1'
+const VERSION='bobo-k12-2026.09.19.1'
 const SHELL=`${VERSION}-shell`
 const RUNTIME=`${VERSION}-runtime`
 const CORE=['/','/manifest.webmanifest','/bobo-icon.svg']
@@ -24,7 +24,7 @@ async function audioResponse(request){
   if(!Number.isFinite(start)||!Number.isFinite(end)||start<0||start>=size||end<start)return new Response(null,{status:416,headers:{'Content-Range':`bytes */${size}`}})
   end=Math.min(end,size-1)
   const body=bytes.slice(start,end+1)
-  return new Response(body,{status:206,headers:{'Accept-Ranges':'bytes','Content-Length':String(body.byteLength),'Content-Range':`bytes ${start}-${end}/${size}`,'Content-Type':response.headers.get('Content-Type')||'audio/mpeg'}})
+  return new Response(body,{status:206,headers:{'Accept-Ranges':'bytes','Content-Length':String(body.byteLength),'Content-Range':`bytes ${start}-${end}/${size}`,'Content-Type':response.headers.get('Content-Type')||'audio/ogg'}})
 }
 
 self.addEventListener('install',event=>event.waitUntil(caches.open(SHELL).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())))
@@ -36,7 +36,7 @@ self.addEventListener('fetch',event=>{
     event.respondWith(fetch(event.request).then(response=>{const copy=response.clone();caches.open(RUNTIME).then(cache=>cache.put(event.request,copy));return response}).catch(async()=>await caches.match(event.request)||caches.match('/')))
     return
   }
-  if(url.origin===location.origin&&url.pathname.startsWith('/audio/')&&url.pathname.endsWith('.mp3')){
+  if(url.origin===location.origin&&url.pathname.startsWith('/audio/')&&url.pathname.endsWith('.opus')){
     event.respondWith(audioResponse(event.request))
     return
   }

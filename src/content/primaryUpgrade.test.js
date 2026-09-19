@@ -11,7 +11,7 @@ import {workshopGames} from './primaryWorkshopGames.js'
 const withMechanic=game=>({...game,...workshopGames[game.id]})
 import {getGameEngine} from '../engines/index.js'
 import {primaryWorkshopEngine as workshop,workshopReady} from '../engines/primaryWorkshopEngine.js'
-import {getLessonContent} from '../lessonContent.js'
+import {getLessonContent,getLessonNarrations} from '../lessonContent.js'
 import {countDecisionPoints,scoreForMistakes} from '../runtime/activityRuntime.js'
 
 test('60 bài riêng, mã chuẩn tồn tại, đủ 8 trò mỗi lớp và ảnh',()=>{
@@ -19,6 +19,7 @@ test('60 bài riêng, mã chuẩn tồn tại, đủ 8 trò mỗi lớp và ản
   const officialCodes=new Set(official.match(/(?<!\d)(?:[1-9]|1[0-2])\.[A-D][1-5]\.(?:MR)?\d+/g))
   assert.equal(primaryLessons.length,60)
   for(const field of ['quiz','steps','example'])assert.equal(new Set(primaryLessons.map(l=>JSON.stringify(l.content[field]))).size,60,field)
+  const theoryVisuals=new Set()
   for(const l of primaryLessons){
     assert.ok(primaryActivities[l.grade].some(g=>g.id===l.content.gameId),l.id)
     for(const code of l.ministry.split(' · '))assert.ok(officialCodes.has(code),`${l.id}: ${code}`)
@@ -27,10 +28,15 @@ test('60 bài riêng, mã chuẩn tồn tại, đủ 8 trò mỗi lớp và ản
     assert.ok(l.content.quiz.options[l.content.quiz.correct])
     assert.ok(l.content.quiz.explanation.length>20)
     const presented=getLessonContent(l)
+    theoryVisuals.add(presented.illustration)
+    assert.ok(existsSync(new URL(`../../public${presented.illustration}`,import.meta.url)),`${l.id}: thiếu ảnh lý thuyết`)
     assert.ok(presented.goal.length<=100,`${l.id}: mục tiêu quá dài`)
     assert.ok(presented.theoryPoints.length>=1&&presented.theoryPoints.length<=5,`${l.id}: số ý lý thuyết`)
     for(const point of presented.theoryPoints)assert.ok(point.length<=200,`${l.id}: ý lý thuyết quá dài`)
+    assert.equal(presented.theoryStoryboard.length,7,`${l.id}: số cảnh lý thuyết`)
+    assert.equal(presented.theoryStoryboard.map(frame=>frame.text).join(' '),getLessonNarrations(presented)[0],`${l.id}: slide phải khớp lời đọc`)
   }
+  assert.equal(theoryVisuals.size,50,'Tiểu học phải dùng đúng 50 ảnh lý thuyết')
   for(let grade=1;grade<=5;grade++)assert.equal(primaryActivities[grade].length,8)
   for(const grade of [3,4,5])for(const game of primaryActivities[grade])assert.ok(existsSync(new URL(`../../public${game.image}`,import.meta.url)),game.image)
   // This checks declared core coverage, not semantic mastery or extension completion.

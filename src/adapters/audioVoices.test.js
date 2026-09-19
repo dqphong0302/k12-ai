@@ -17,14 +17,14 @@ test('catalog VieNeu giữ preset riêng cho ba cấp', () => {
     assert.ok(vieneuVoiceCatalog.some(item => item.id === voice.id))
     assert.match(voice.id, /^vieneu-/)
     assert.ok(voice.voice && voice.style && voice.model)
-    assert.match(voice.sample,/^\/audio\/.+\.mp3$/)
+    assert.match(voice.sample,/^\/audio\/.+\.opus$/)
     assert.equal(typeof voice.speed, 'number')
     assert.ok(voice.speed > 0)
   }
 })
 
-test('nhãn bài học nói rõ đây là preset MP3 của catalog nhiều giọng', () => {
-  assert.equal(lessonAudioVoiceLabel('primary'), 'Preset MP3: Trúc Ly · VieNeu · tươi sáng · 1,05×')
+test('nhãn bài học nói rõ đây là preset Opus của catalog nhiều giọng', () => {
+  assert.equal(lessonAudioVoiceLabel('primary'), 'Preset Opus: Trúc Ly · VieNeu · tươi sáng · 1,05×')
   assert.equal(lessonAudioVoiceLabel('unknown'), '')
 })
 
@@ -39,5 +39,5 @@ test('chữ ký duyệt giọng đổi khi cấu hình hoặc mẫu audio đổi
   const original=voicePresetSignature(voice)
   assert.notEqual(voicePresetSignature({...voice,id:'vieneu-voice-khac'}),original)
   assert.notEqual(voicePresetSignature({...voice,speed:1.1}),original)
-  assert.notEqual(voicePresetSignature({...voice,sample:'/audio/mau-khac.mp3'}),original)
+  assert.notEqual(voicePresetSignature({...voice,sample:'/audio/mau-khac.opus'}),original)
 })

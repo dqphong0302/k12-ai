@@ -1,5 +1,5 @@
 export function getHighLessonAudioPath(grade, lessonNumber, part) {
-  return `/audio/high/grade-${grade}/lesson-${String(lessonNumber).padStart(2, '0')}/part-${part + 1}.mp3`
+  return `/audio/high/grade-${grade}/lesson-${String(lessonNumber).padStart(2, '0')}/part-${part + 1}.opus`
 }
 
 export function getHighLessonNarrations({ grade, lesson }) {
